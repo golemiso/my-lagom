@@ -2,13 +2,14 @@ package controllers
 
 import java.util.UUID
 
-import domain.{ Player, PlayerID, PlayerRepository }
+import com.golemiso.mylagom.player.api.{NewPlayer, PlayerName, PlayerService}
+import domain.{Player, PlayerID, PlayerRepository}
 import play.api.mvc._
-import play.api.libs.json.{ Json, OFormat }
+import play.api.libs.json.{Json, OFormat}
 
 import scala.concurrent.ExecutionContext
 
-class PlayerController(mcc: MessagesControllerComponents, repository: PlayerRepository)(implicit ec: ExecutionContext) extends MessagesAbstractController(mcc) {
+class PlayerController(mcc: MessagesControllerComponents, playerService: PlayerService, repository: PlayerRepository)(implicit ec: ExecutionContext) extends MessagesAbstractController(mcc) {
 
   def get(id: UUID): Action[AnyContent] = Action.async { implicit request: MessagesRequest[AnyContent] =>
     repository.resolveBy(PlayerID(id)).map { player =>
@@ -28,10 +29,10 @@ class PlayerController(mcc: MessagesControllerComponents, repository: PlayerRepo
     }
   }
 
-  def post(): Action[PlayerResource] = Action.async(parse.json[PlayerResource]) { implicit request: MessagesRequest[PlayerResource] =>
+  def post(): Action[NewPlayerResource] = Action.async(parse.json[NewPlayerResource]) { request: MessagesRequest[NewPlayerResource] =>
     val playerResource = request.body
-    repository.store(playerResource).map { player =>
-      Created(Json.toJson[PlayerResource](player))
+    playerService.createPlayer.invoke(NewPlayer(PlayerName(playerResource.name))).map { player =>
+      Created
     }
   }
 
@@ -43,12 +44,16 @@ class PlayerController(mcc: MessagesControllerComponents, repository: PlayerRepo
   }
 }
 
-case class PlayerResource(id: Option[UUID], name: String)
+case class NewPlayerResource(name: String)
+object NewPlayerResource {
+  implicit val format: OFormat[NewPlayerResource] = Json.format[NewPlayerResource]
+}
+
+case class PlayerResource(id: UUID, name: String)
 object PlayerResource {
   implicit val format: OFormat[PlayerResource] = Json.format[PlayerResource]
   implicit def toEntity(playerResource: PlayerResource): Player = {
-    val id = playerResource.id.map(PlayerID.apply).getOrElse(PlayerID.generate)
-    Player(id, playerResource.name)
+    Player(PlayerID(playerResource.id), playerResource.name)
   }
-  implicit def fromEntity(player: Player): PlayerResource = PlayerResource(Some(player.id.value), player.name)
+  implicit def fromEntity(player: Player): PlayerResource = PlayerResource(player.id.value, player.name)
 }
