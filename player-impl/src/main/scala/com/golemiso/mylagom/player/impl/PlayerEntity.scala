@@ -51,6 +51,10 @@ sealed trait PlayerCommand
 
 case class CreatePlayer(name: PlayerName) extends PlayerCommand with ReplyType[Done]
 
+case class UpdatePlayer(name: PlayerName) extends PlayerCommand with ReplyType[Done]
+
+case object DeletePlayer extends PlayerCommand with ReplyType[Done]
+
 object CreatePlayer {
   implicit val format: Format[CreatePlayer] = Json.format
 }

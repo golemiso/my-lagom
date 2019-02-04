@@ -3,28 +3,30 @@ package com.golemiso.mylagom.player.api
 import java.util.UUID
 
 import akka.NotUsed
-import com.lightbend.lagom.scaladsl.api.{Service, ServiceCall}
+import com.lightbend.lagom.scaladsl.api.transport.Method
+import com.lightbend.lagom.scaladsl.api.{Descriptor, Service, ServiceCall}
 import play.api.libs.json.{Format, Json}
-import com.golemiso.mylagom.utils.JsonFormats._
 
 trait PlayerService extends Service {
   def createPlayer: ServiceCall[NewPlayer, Player]
-  def getPlayer(playerId: UUID): ServiceCall[NotUsed, Player]
+  def readAllPlayers: ServiceCall[NotUsed, Seq[Player]]
+  def readPlayer(id: PlayerId): ServiceCall[NotUsed, Player]
+  def updatePlayer(id: PlayerId): ServiceCall[Player, Player]
+  def deletePlayer(id: PlayerId): ServiceCall[NotUsed, NotUsed]
 
-  // Remove once we have a proper player service
-  def getPlayers: ServiceCall[NotUsed, Seq[Player]]
-
-  def descriptor = {
+  def descriptor: Descriptor = {
     import Service._
     named("player").withCalls(
-      pathCall("/api/players", createPlayer),
-      pathCall("/api/players/:id", getPlayer _),
-      pathCall("/api/players", getPlayers)
+      restCall(Method.POST, "/api/players", createPlayer),
+      restCall(Method.GET, "/api/players", readAllPlayers),
+      restCall(Method.GET, "/api/players/:id", readPlayer _),
+      restCall(Method.PUT, "/api/players/:id", updatePlayer _),
+      restCall(Method.DELETE, "/api/players/:id", deletePlayer _)
     )
   }
 }
 
-case class PlayerId(id: UUID) extends AnyVal
+final case class PlayerId(id: UUID) extends AnyVal
 object PlayerId {
   implicit  val format: Format[PlayerId] = Json.valueFormat
 }
