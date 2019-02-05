@@ -9,7 +9,8 @@ import akka.persistence.query.PersistenceQuery
 import akka.stream.Materializer
 import akka.stream.scaladsl.Sink
 import com.golemiso.mylagom.player.api
-import com.golemiso.mylagom.player.api.{PlayerId, PlayerService}
+import com.golemiso.mylagom.player.api.Player.PlayerId
+import com.golemiso.mylagom.player.api.PlayerService
 import com.lightbend.lagom.scaladsl.api.ServiceCall
 import com.lightbend.lagom.scaladsl.api.transport.NotFound
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntityRegistry

@@ -8,11 +8,14 @@
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
-GET     /players/:id                controllers.PlayerController.get(id: com.golemiso.mylagom.player.api.PlayerId)
+GET     /players/:id                controllers.PlayerController.get(id: com.golemiso.mylagom.player.api.Player.PlayerId)
+#GET     /players                    controllers.PlayerController.get(slug: com.golemiso.mylagom.player.api.PlayerSlug)
 GET     /players                    controllers.PlayerController.getAll
 POST    /players                    controllers.PlayerController.post()
-PUT     /players/:id                controllers.PlayerController.put(id: com.golemiso.mylagom.player.api.PlayerId)
-DELETE  /players/:id                controllers.PlayerController.delete(id: com.golemiso.mylagom.player.api.PlayerId)
+PUT     /players/:id                controllers.PlayerController.put(id: com.golemiso.mylagom.player.api.Player.PlayerId)
+DELETE  /players/:id                controllers.PlayerController.delete(id: com.golemiso.mylagom.player.api.Player.PlayerId)
+
+#GET     /competition/:id            controllers.CompetitionController.get()
 
 GET     /teams/:id                  controllers.TeamController.get(id: java.util.UUID)
 GET     /teams                      controllers.TeamController.getAll

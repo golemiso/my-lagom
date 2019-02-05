@@ -5,11 +5,11 @@ import java.util.UUID
 import org.scalatestplus.play.BaseOneAppPerTest
 import org.scalatest.FunSpec
 import play.api.test.FakeRequest
-import loader.MacWireApplicationFactory
+import loader.ApplicationFactory
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 
-class PlayerControllerSpec extends FunSpec with BaseOneAppPerTest with MacWireApplicationFactory {
+class PlayerControllerSpec extends FunSpec with BaseOneAppPerTest with ApplicationFactory {
   describe("PlayerController") {
     describe("post") {
       describe("id unspecified") {

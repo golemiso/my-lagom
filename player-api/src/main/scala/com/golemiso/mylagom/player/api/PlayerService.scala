@@ -3,12 +3,13 @@ package com.golemiso.mylagom.player.api
 import java.util.UUID
 
 import akka.NotUsed
+import com.golemiso.mylagom.player.api.Player.PlayerId
 import com.lightbend.lagom.scaladsl.api.transport.Method
 import com.lightbend.lagom.scaladsl.api.{Descriptor, Service, ServiceCall}
 import play.api.libs.json.{Format, Json}
 
 trait PlayerService extends Service {
-  def createPlayer: ServiceCall[NewPlayer, Player]
+  def createPlayer: ServiceCall[UnpersistedPlayer, Player]
   def readAllPlayers: ServiceCall[NotUsed, Seq[Player]]
   def readPlayer(id: PlayerId): ServiceCall[NotUsed, Player]
   def updatePlayer(id: PlayerId): ServiceCall[Player, Player]
@@ -26,22 +27,32 @@ trait PlayerService extends Service {
   }
 }
 
-final case class PlayerId(id: UUID) extends AnyVal
-object PlayerId {
-  implicit  val format: Format[PlayerId] = Json.valueFormat
-}
+//final case class PlayerId(id: UUID) extends AnyVal
+//object PlayerId {
+//  implicit  val format: Format[PlayerId] = Json.valueFormat
+//}
 
 case class PlayerName(name: String) extends AnyVal
 object PlayerName {
   implicit  val format: Format[PlayerName] = Json.valueFormat
 }
 
+case class PlayerSlug(slug: String) extends AnyVal
+object PlayerSlug {
+  implicit  val format: Format[PlayerSlug] = Json.valueFormat
+}
+
 case class Player(id: PlayerId, name: PlayerName)
 object Player {
   implicit val format: Format[Player] = Json.format
+
+  final case class PlayerId(id: UUID) extends AnyVal
+  object PlayerId {
+    implicit  val format: Format[PlayerId] = Json.valueFormat
+  }
 }
 
-case class NewPlayer(name: PlayerName)
-object NewPlayer {
-  implicit val format: Format[NewPlayer] = Json.format
+case class UnpersistedPlayer(name: PlayerName)
+object UnpersistedPlayer {
+  implicit val format: Format[UnpersistedPlayer] = Json.format
 }

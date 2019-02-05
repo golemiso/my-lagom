@@ -5,7 +5,7 @@ import play.api.inject.DefaultApplicationLifecycle
 import play.api.{ Application, ApplicationLoader, Configuration, Environment }
 import play.core.DefaultWebCommands
 
-trait MacWireApplicationFactory extends FakeApplicationFactory {
+trait ApplicationFactory extends FakeApplicationFactory {
 
   private class MacWireApplicationBuilder {
     def build(): Application = {

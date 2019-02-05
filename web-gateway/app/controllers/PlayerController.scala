@@ -1,7 +1,8 @@
 package controllers
 
-import com.golemiso.mylagom.player.api.{NewPlayer, PlayerId, PlayerName, PlayerService}
-import domain.{Player, PlayerID, PlayerRepository}
+import com.golemiso.mylagom.player.api.Player.PlayerId
+import com.golemiso.mylagom.player.api.{Player, PlayerName, PlayerService, UnpersistedPlayer}
+import domain.{PlayerID, PlayerRepository}
 import play.api.mvc._
 import play.api.libs.json.{Json, OFormat}
 
@@ -31,7 +32,7 @@ class PlayerController(mcc: MessagesControllerComponents, playerService: PlayerS
 
   def post(): Action[NewPlayerResource] = Action.async(parse.json[NewPlayerResource]) { request: MessagesRequest[NewPlayerResource] =>
     val playerResource = request.body
-    playerService.createPlayer.invoke(NewPlayer(PlayerName(playerResource.name))).map { player =>
+    playerService.createPlayer.invoke(UnpersistedPlayer(PlayerName(playerResource.name))).map { player =>
       val resource = PlayerResource(player.id, player.name)
       Created(Json.toJson(resource))
     }
@@ -53,8 +54,8 @@ object NewPlayerResource {
 case class PlayerResource(id: PlayerId, name: PlayerName)
 object PlayerResource {
   implicit val format: OFormat[PlayerResource] = Json.format[PlayerResource]
-  implicit def toEntity(playerResource: PlayerResource): Player = {
-    Player(PlayerID(playerResource.id.id), playerResource.name.name)
+  implicit def toEntity(playerResource: PlayerResource): domain.Player = {
+    domain.Player(PlayerID(playerResource.id.id), playerResource.name.name)
   }
-  implicit def fromEntity(player: Player): PlayerResource = PlayerResource(PlayerId(player.id.value), PlayerName(player.name))
+  implicit def fromEntity(player: domain.Player): PlayerResource = PlayerResource(PlayerId(player.id.value), PlayerName(player.name))
 }
