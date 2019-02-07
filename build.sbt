@@ -9,14 +9,14 @@ val macwire = "com.softwaremill.macwire" %% "macros" % "2.3.0" % "provided"
 val scalaTest = "org.scalatest" %% "scalatest" % "3.0.4" % Test
 val scalaTestPlusPlay = "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
 
-lazy val `player-api` = (project in file("player-api"))
+lazy val `player-api` = (project in file("player/api"))
   .settings(
     libraryDependencies ++= Seq(
       lagomScaladslApi
     )
   )
 
-lazy val `player-impl` = (project in file("player-impl"))
+lazy val `player-impl` = (project in file("player/impl"))
   .enablePlugins(LagomScala)
   .settings(
     libraryDependencies ++= Seq(
@@ -26,6 +26,24 @@ lazy val `player-impl` = (project in file("player-impl"))
     )
   )
   .dependsOn(`player-api`)
+
+lazy val `competition-api` = (project in file("competition/api"))
+  .settings(
+    libraryDependencies ++= Seq(
+      lagomScaladslApi
+    )
+  )
+
+lazy val `competition-impl` = (project in file("competition/impl"))
+  .enablePlugins(LagomScala)
+  .settings(
+    libraryDependencies ++= Seq(
+      lagomScaladslPersistenceCassandra,
+      macwire,
+      scalaTest
+    )
+  )
+  .dependsOn(`competition-api`)
 
 lazy val `web-gateway` = (project in file("web-gateway"))
   .enablePlugins(LagomPlayScala)
@@ -38,6 +56,6 @@ lazy val `web-gateway` = (project in file("web-gateway"))
     ),
     javaOptions in Test += "-Dconfig.file=test/resources/test.conf"
   )
-  .dependsOn(`player-api`)
+  .dependsOn(`player-api`, `competition-api`)
 
 lagomCassandraCleanOnStart in ThisBuild := true

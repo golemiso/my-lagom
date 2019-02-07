@@ -1,12 +1,13 @@
 package loader
 
+import com.golemiso.mylagom.competition.api.CompetitionService
 import com.golemiso.mylagom.player.api.PlayerService
 import com.lightbend.lagom.scaladsl.api.{LagomConfigComponent, ServiceAcl, ServiceInfo}
 import com.lightbend.lagom.scaladsl.client.LagomServiceClientComponents
 import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
 import com.softwaremill.macwire._
 import com.typesafe.config.Config
-import controllers.{AssetsComponents, BattleController, PlayerController, RankingController, TeamController}
+import controllers.{AssetsComponents, BattleController, CompetitionController, PlayerController, RankingController, TeamController}
 import domain.{BattleRepository, PlayerRepository, TeamRepository}
 import infra.mongodb.{MongoDBBattleRepository, MongoDBPlayerRepository, MongoDBTeamRepository}
 import play.api.ApplicationLoader.Context
@@ -49,6 +50,7 @@ abstract class WebGateway(context: Context) extends BuiltInComponentsFromContext
   }
 
   lazy val playerService: PlayerService = serviceClient.implement[PlayerService]
+  lazy val competitionService: CompetitionService = serviceClient.implement[CompetitionService]
 
   lazy val messagesActionBuilder: MessagesActionBuilder = wire[WebGatewayMessagesActionBuilder]
   lazy val messagesControllerComponents: MessagesControllerComponents = wire[WebGatewayMessagesControllerComponents]
@@ -64,6 +66,8 @@ abstract class WebGateway(context: Context) extends BuiltInComponentsFromContext
 
   lazy val rankingController: RankingController = wire[RankingController]
   lazy val playerRecordService: PlayerRecordService = wire[PlayerRecordService]
+
+  lazy val competitionController: CompetitionController = wire[CompetitionController]
 
   lazy val router: Router = {
     // add the prefix string in local scope for the Routes constructor

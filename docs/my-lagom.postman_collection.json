@@ -1,0 +1,124 @@
+{
+	"info": {
+		"_postman_id": "e0dff96d-1228-4ba7-af33-c7f961566a7d",
+		"name": "my-lagom",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"_postman_id": "388835eb-986e-401e-b1aa-8fa6f11fc62f",
+			"name": "Competition",
+			"item": [
+				{
+					"_postman_id": "e6972a26-42a1-46ab-a837-cf9c0e8faa3f",
+					"name": "POST COMPETITIONS",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"slug\": \"test-competition\",\n  \"name\": \"Test Competition\"\n}"
+						},
+						"url": {
+							"raw": "localhost:9000/competitions",
+							"host": [
+								"localhost"
+							],
+							"port": "9000",
+							"path": [
+								"competitions"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"_postman_id": "aa6a342d-b221-47d9-aeb8-49fc8d51a42f",
+			"name": "Player",
+			"item": [
+				{
+					"_postman_id": "88498073-25f5-40cb-8b7e-446f770060a0",
+					"name": "POST PLAYERS",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"slug\": \"test-player\",\n\t\"name\": \"Test Player\"\n}"
+						},
+						"url": {
+							"raw": "localhost:9000/players",
+							"host": [
+								"localhost"
+							],
+							"port": "9000",
+							"path": [
+								"players"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "7dae2fb6-a2f4-4046-abe8-7b0b1b17a3a0",
+					"name": "GET PLAYERS",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "localhost:9000/players",
+							"host": [
+								"localhost"
+							],
+							"port": "9000",
+							"path": [
+								"players"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "e408c3c3-4dab-4655-93b0-c46f9c50e114",
+					"name": "GET PLAYERS BY ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "localhost:9000/players/:id",
+							"host": [
+								"localhost"
+							],
+							"port": "9000",
+							"path": [
+								"players",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "08e3a6ca-19db-4941-afc4-2e3f092e95d4"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

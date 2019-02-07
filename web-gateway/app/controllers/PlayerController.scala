@@ -1,7 +1,6 @@
 package controllers
 
-import com.golemiso.mylagom.player.api.Player.PlayerId
-import com.golemiso.mylagom.player.api.{Player, PlayerName, PlayerService, UnpersistedPlayer}
+import com.golemiso.mylagom.player.api._
 import domain.{PlayerID, PlayerRepository}
 import play.api.mvc._
 import play.api.libs.json.{Json, OFormat}
