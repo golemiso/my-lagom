@@ -2,17 +2,18 @@ package controllers
 
 import java.util.UUID
 
-import domain.{ Team, TeamID, TeamRepository }
-import play.api.libs.json.{ Json, OFormat }
+import com.golemiso.mylagom.team.api.{Team, TeamRequest, TeamService}
+import domain.{TeamID, TeamRepository, Team => DomainTeam}
+import play.api.libs.json.{Json, OFormat}
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
 
-class TeamController(mcc: MessagesControllerComponents, repository: TeamRepository)(implicit ec: ExecutionContext) extends MessagesAbstractController(mcc) {
+class TeamController(mcc: MessagesControllerComponents, service: TeamService, repository: TeamRepository)(implicit ec: ExecutionContext) extends MessagesAbstractController(mcc) {
 
-  def get(id: UUID): Action[AnyContent] = Action.async { implicit request: MessagesRequest[AnyContent] =>
-    repository.resolveBy(TeamID(id)).map { team =>
-      Ok(Json.toJson[TeamResource](team))
+  def get(id: Team.Id): Action[AnyContent] = Action.async { _ =>
+    service.read(id).invoke.map { team =>
+      Ok(Json.toJson(team))
     }
   }
 
@@ -28,10 +29,9 @@ class TeamController(mcc: MessagesControllerComponents, repository: TeamReposito
     }
   }
 
-  def post(): Action[TeamResource] = Action.async(parse.json[TeamResource]) { implicit request: MessagesRequest[TeamResource] =>
-    val teamResource = request.body
-    repository.store(teamResource).map { team =>
-      Created(Json.toJson[TeamResource](team))
+  def post(): Action[TeamRequest] = Action.async(parse.json[TeamRequest]) { request =>
+    service.createNew().invoke(request.body).map { id =>
+      Created(Json.toJson(id))
     }
   }
 
@@ -46,9 +46,9 @@ class TeamController(mcc: MessagesControllerComponents, repository: TeamReposito
 case class TeamResource(id: Option[UUID], players: Seq[PlayerResource])
 object TeamResource {
   implicit val format: OFormat[TeamResource] = Json.format[TeamResource]
-  implicit def toEntity(teamResource: TeamResource): Team = {
+  implicit def toEntity(teamResource: TeamResource): DomainTeam = {
     val id = teamResource.id.map(TeamID.apply).getOrElse(TeamID.generate)
-    Team(id, teamResource.players)
+    DomainTeam(id, teamResource.players)
   }
-  implicit def fromEntity(team: Team): TeamResource = TeamResource(Some(team.id.value), team.players)
+  implicit def fromEntity(team: DomainTeam): TeamResource = TeamResource(Some(team.id.value), team.players)
 }

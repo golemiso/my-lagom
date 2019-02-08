@@ -5,20 +5,20 @@ import com.lightbend.lagom.scaladsl.api.transport.Method
 import com.lightbend.lagom.scaladsl.api.{Descriptor, Service, ServiceCall}
 
 trait PlayerService extends Service {
-  def createPlayer: ServiceCall[UnpersistedPlayer, Player]
-  def readAllPlayers: ServiceCall[NotUsed, Seq[Player]]
-  def readPlayer(id: PlayerId): ServiceCall[NotUsed, Player]
-  def updatePlayer(id: PlayerId): ServiceCall[Player, Player]
-  def deletePlayer(id: PlayerId): ServiceCall[NotUsed, NotUsed]
+  def create(): ServiceCall[PlayerRequest, Player.Id]
+  def readAll: ServiceCall[NotUsed, Seq[Player]]
+  def read(id: Player.Id): ServiceCall[NotUsed, Player]
+  def update(id: Player.Id): ServiceCall[PlayerRequest, Player.Id]
+  def delete(id: Player.Id): ServiceCall[NotUsed, NotUsed]
 
   def descriptor: Descriptor = {
     import Service._
     named("players").withCalls(
-      restCall(Method.POST, "/api/players", createPlayer),
-      restCall(Method.GET, "/api/players", readAllPlayers),
-      restCall(Method.GET, "/api/players/:id", readPlayer _),
-      restCall(Method.PUT, "/api/players/:id", updatePlayer _),
-      restCall(Method.DELETE, "/api/players/:id", deletePlayer _)
+      restCall(Method.POST, "/api/players", create _),
+      restCall(Method.GET, "/api/players", readAll),
+      restCall(Method.GET, "/api/players/:id", read _),
+      restCall(Method.PUT, "/api/players/:id", update _),
+      restCall(Method.DELETE, "/api/players/:id", delete _)
     )
   }
 }

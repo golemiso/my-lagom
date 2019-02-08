@@ -8,7 +8,6 @@ import akka.persistence.cassandra.query.scaladsl.CassandraReadJournal
 import akka.persistence.query.PersistenceQuery
 import akka.stream.Materializer
 import akka.stream.scaladsl.Sink
-import com.golemiso.mylagom.player.api
 import com.golemiso.mylagom.player.api._
 import com.lightbend.lagom.scaladsl.api.ServiceCall
 import com.lightbend.lagom.scaladsl.api.transport.NotFound
@@ -20,46 +19,45 @@ class PlayerServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
 
   private val currentIdsQuery = PersistenceQuery(system).readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
 
-  override def createPlayer = ServiceCall { newPlayer =>
-    val id = PlayerId(UUID.randomUUID())
-    refFor(id).ask(CreatePlayer(newPlayer.name)).map { _ =>
-      api.Player(id, newPlayer.name)
+  override def create() = ServiceCall { request =>
+    val id = Player.Id(UUID.randomUUID())
+    refFor(id).ask(PlayerCommand.Create(request(id))).map { _ =>
+      id
     }
   }
 
-  override def readAllPlayers = ServiceCall { _ =>
+  override def readAll = ServiceCall { _ =>
     // Note this should never make production....
     currentIdsQuery.currentPersistenceIds()
       .filter(_.startsWith("PlayerEntity|"))
       .mapAsync(4) { id =>
         val entityId = id.split("\\|", 2).last
         registry.refFor[PlayerEntity](entityId)
-          .ask(GetPlayer)
-          .map(_.map(player => api.Player(PlayerId(UUID.fromString(entityId)), player.name)))
+          .ask(PlayerCommand.Read)
       }.collect {
         case Some(player) => player
       }
       .runWith(Sink.seq)
   }
 
-  override def readPlayer(id: PlayerId) = ServiceCall { _ =>
-    refFor(id).ask(GetPlayer).map {
+  override def read(id: Player.Id) = ServiceCall { _ =>
+    refFor(id).ask(PlayerCommand.Read).map {
       case Some(player) =>
-        api.Player(id, player.name)
+        player
       case None =>
-        throw NotFound(s"Player with id $id")
+        throw NotFound(s"Player with id ${id.id.toString}")
     }
   }
 
-  override def updatePlayer(id: PlayerId) = ServiceCall { player =>
-    refFor(id).ask(UpdatePlayer(player.name)).map { _ =>
-      api.Player(id, player.name)
+  override def update(id: Player.Id) = ServiceCall { request =>
+    refFor(id).ask(PlayerCommand.Update(request(id))).map { _ =>
+      id
     }
   }
 
-  override def deletePlayer(id: PlayerId) = ServiceCall { _ =>
-    refFor(id).ask(DeletePlayer).map { _ => NotUsed }
+  override def delete(id: Player.Id) = ServiceCall { _ =>
+    refFor(id).ask(PlayerCommand.Delete).map { _ => NotUsed }
   }
 
-  private def refFor(id: PlayerId) = registry.refFor[PlayerEntity](id.id.toString)
+  private def refFor(id: Player.Id) = registry.refFor[PlayerEntity](id.id.toString)
 }

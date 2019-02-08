@@ -8,17 +8,17 @@
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
-GET     /players/:id                controllers.PlayerController.get(id: com.golemiso.mylagom.player.api.PlayerId)
+GET     /players/:id                controllers.PlayerController.get(id: com.golemiso.mylagom.player.api.Player.Id)
 #GET     /players                    controllers.PlayerController.get(slug: com.golemiso.mylagom.player.api.PlayerSlug)
 GET     /players                    controllers.PlayerController.getAll
 POST    /players                    controllers.PlayerController.post()
-PUT     /players/:id                controllers.PlayerController.put(id: com.golemiso.mylagom.player.api.PlayerId)
-DELETE  /players/:id                controllers.PlayerController.delete(id: com.golemiso.mylagom.player.api.PlayerId)
+PUT     /players/:id                controllers.PlayerController.put(id: com.golemiso.mylagom.player.api.Player.Id)
+DELETE  /players/:id                controllers.PlayerController.delete(id: com.golemiso.mylagom.player.api.Player.Id)
 
 GET     /competitions/:id           controllers.CompetitionController.get(id: com.golemiso.mylagom.competition.api.Competition.Id)
 POST    /competitions               controllers.CompetitionController.post()
 
-GET     /teams/:id                  controllers.TeamController.get(id: java.util.UUID)
+GET     /teams/:id                  controllers.TeamController.get(id: com.golemiso.mylagom.team.api.Team.Id)
 GET     /teams                      controllers.TeamController.getAll
 POST    /teams                      controllers.TeamController.post()
 PUT     /teams/:id                  controllers.TeamController.put(id: java.util.UUID)

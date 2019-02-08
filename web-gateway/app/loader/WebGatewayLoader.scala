@@ -1,6 +1,7 @@
 package loader
 
 import com.golemiso.mylagom.competition.api.CompetitionService
+import com.golemiso.mylagom.team.api.TeamService
 import com.golemiso.mylagom.player.api.PlayerService
 import com.lightbend.lagom.scaladsl.api.{LagomConfigComponent, ServiceAcl, ServiceInfo}
 import com.lightbend.lagom.scaladsl.client.LagomServiceClientComponents
@@ -50,6 +51,7 @@ abstract class WebGateway(context: Context) extends BuiltInComponentsFromContext
   }
 
   lazy val playerService: PlayerService = serviceClient.implement[PlayerService]
+  lazy val teamService: TeamService = serviceClient.implement[TeamService]
   lazy val competitionService: CompetitionService = serviceClient.implement[CompetitionService]
 
   lazy val messagesActionBuilder: MessagesActionBuilder = wire[WebGatewayMessagesActionBuilder]

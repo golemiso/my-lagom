@@ -5,6 +5,7 @@ import com.golemiso.mylagom.competition.api.Competition
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity.ReplyType
 import com.lightbend.lagom.scaladsl.playjson.{JsonSerializer, JsonSerializerRegistry}
+import play.api.libs.json.Format
 
 class CompetitionEntity extends PersistentEntity {
   override type Command = CompetitionCommand
@@ -14,10 +15,16 @@ class CompetitionEntity extends PersistentEntity {
   override def initialState: State = None
 
   override def behavior: Behavior = {
-    case Some(competition) =>
-      Actions()
+    case Some(_) =>
+      Actions().onReadOnlyCommand[CompetitionCommand.Read.type, Option[Competition]] {
+        case (CompetitionCommand.Read, ctx, state) => ctx.reply(state)
+      }.onReadOnlyCommand[CompetitionCommand.Create, Done] {
+        case (CompetitionCommand.Create(_), ctx, _) => ctx.invalidCommand("Competition already exists")
+      }
     case None =>
-      Actions().onCommand[CompetitionCommand.Create, Done] {
+      Actions().onReadOnlyCommand[CompetitionCommand.Read.type, Option[Competition]] {
+        case (CompetitionCommand.Read, ctx, state) => ctx.reply(state)
+      }.onCommand[CompetitionCommand.Create, Done] {
         case (CompetitionCommand.Create(competition), context, _) =>
           context.thenPersist(CompetitionEvent.Created(competition))(_ => context.reply(Done))
       }.onEvent {
@@ -29,6 +36,10 @@ class CompetitionEntity extends PersistentEntity {
 sealed trait CompetitionCommand
 object CompetitionCommand {
   case class Create(competition: Competition) extends CompetitionCommand with ReplyType[Done]
+
+  case object Read extends CompetitionCommand with ReplyType[Option[Competition]] {
+    implicit val format: Format[Read.type] = JsonSerializer.emptySingletonFormat(Read)
+  }
 }
 
 sealed trait CompetitionEvent

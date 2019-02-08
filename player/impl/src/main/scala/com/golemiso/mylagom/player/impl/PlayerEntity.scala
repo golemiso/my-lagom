@@ -1,11 +1,9 @@
 package com.golemiso.mylagom.player.impl
 
 import akka.Done
-import com.golemiso.mylagom.player.api.PlayerName
+import com.golemiso.mylagom.player.api.Player
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity
 import com.lightbend.lagom.scaladsl.playjson.{JsonSerializer, JsonSerializerRegistry}
-import play.api.libs.json.{Format, Json}
-import com.golemiso.mylagom.utils.JsonFormats._
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity.ReplyType
 
 class PlayerEntity extends PersistentEntity {
@@ -15,59 +13,46 @@ class PlayerEntity extends PersistentEntity {
   override def initialState: State = None
 
   override def behavior: Behavior = {
-    case Some(player) =>
-      Actions().onReadOnlyCommand[GetPlayer.type, Option[Player]] {
-        case (GetPlayer, ctx, state) => ctx.reply(state)
-      }.onReadOnlyCommand[CreatePlayer, Done] {
-        case (CreatePlayer(name), ctx, state) => ctx.invalidCommand("Player already exists")
+    case Some(_) =>
+      Actions().onReadOnlyCommand[PlayerCommand.Read.type, Option[Player]] {
+        case (PlayerCommand.Read, ctx, state) => ctx.reply(state)
+      }.onReadOnlyCommand[PlayerCommand.Create, Done] {
+        case (PlayerCommand.Create(_), ctx, _) => ctx.invalidCommand("Player already exists")
+      }.onCommand[PlayerCommand.Update, Done] {
+        case (PlayerCommand.Update(player), ctx, _) =>
+          ctx.thenPersist(PlayerEvent.Updated(player))(_ => ctx.reply(Done))
+      }.onEvent {
+        case (PlayerEvent.Updated(player), _) => Some(player)
       }
     case None =>
-      Actions().onReadOnlyCommand[GetPlayer.type, Option[Player]] {
-        case (GetPlayer, ctx, state) => ctx.reply(state)
-      }.onCommand[CreatePlayer, Done] {
-        case (CreatePlayer(name), ctx, state) =>
-          ctx.thenPersist(PlayerCreated(name))(_ => ctx.reply(Done))
+      Actions().onReadOnlyCommand[PlayerCommand.Read.type, Option[Player]] {
+        case (PlayerCommand.Read, ctx, state) => ctx.reply(state)
+      }.onCommand[PlayerCommand.Create, Done] {
+        case (PlayerCommand.Create(player), ctx, _) =>
+          ctx.thenPersist(PlayerEvent.Created(player))(_ => ctx.reply(Done))
       }.onEvent {
-        case (PlayerCreated(name), state) => Some(Player(name))
+        case (PlayerEvent.Created(player), _) => Some(player)
       }
   }
 }
 
-case class Player(name: PlayerName)
 
-object Player {
-  implicit val format: Format[Player] = Json.format
+sealed trait PlayerCommand
+object PlayerCommand {
+  case class Create(player: Player) extends PlayerCommand with ReplyType[Done]
+  case object Read extends PlayerCommand with ReplyType[Option[Player]]
+  case class Update(player: Player) extends PlayerCommand with ReplyType[Done]
+  case object Delete extends PlayerCommand with ReplyType[Done]
 }
 
 sealed trait PlayerEvent
-
-case class PlayerCreated(name: PlayerName) extends PlayerEvent
-
-object PlayerCreated {
-  implicit val format: Format[PlayerCreated] = Json.format
-}
-
-sealed trait PlayerCommand
-
-case class CreatePlayer(name: PlayerName) extends PlayerCommand with ReplyType[Done]
-
-case class UpdatePlayer(name: PlayerName) extends PlayerCommand with ReplyType[Done]
-
-case object DeletePlayer extends PlayerCommand with ReplyType[Done]
-
-object CreatePlayer {
-  implicit val format: Format[CreatePlayer] = Json.format
-}
-
-case object GetPlayer extends PlayerCommand with ReplyType[Option[Player]] {
-  implicit val format: Format[GetPlayer.type] = singletonFormat(GetPlayer)
+object PlayerEvent {
+  case class Created(player: Player) extends PlayerEvent
+  case class Updated(player: Player) extends PlayerEvent
 }
 
 object PlayerSerializerRegistry extends JsonSerializerRegistry {
   override def serializers = List(
-    JsonSerializer[Player],
-    JsonSerializer[PlayerCreated],
-    JsonSerializer[CreatePlayer],
-    JsonSerializer[GetPlayer.type]
+    JsonSerializer[Player]
   )
 }
