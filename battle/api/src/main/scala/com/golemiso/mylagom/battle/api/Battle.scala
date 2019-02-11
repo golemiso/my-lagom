@@ -1,12 +1,12 @@
-package com.golemiso.mylagom.player.api
+package com.golemiso.mylagom.battle.api
 
 import java.util.UUID
 
 import play.api.libs.json.{Format, Json}
 
-case class Player(id: Player.Id, slug: Player.Slug, name: Player.Name)
-object Player {
-  implicit val format: Format[Player] = Json.format
+case class Battle(id: Battle.Id, slug: Battle.Slug, name: Battle.Name)
+object Battle {
+  implicit val format: Format[Battle] = Json.format
 
   case class Id(id: UUID) extends AnyVal
   object Id {
@@ -24,9 +24,9 @@ object Player {
   }
 }
 
-case class PlayerRequest(slug: Player.Slug, name: Player.Name) {
-  def apply(id: Player.Id) = Player(id, slug, name)
+case class BattleRequest(slug: Battle.Slug, name: Battle.Name) {
+  def apply(id: Battle.Id) = Battle(id, slug, name)
 }
-object PlayerRequest {
-  implicit val format: Format[PlayerRequest] = Json.format
+object BattleRequest {
+  implicit val format: Format[BattleRequest] = Json.format
 }

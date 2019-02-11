@@ -38,7 +38,7 @@ class PlayerController(mcc: MessagesControllerComponents, service: PlayerService
 
   def put(id: Player.Id): Action[PlayerRequest] = Action.async(parse.json[PlayerRequest]) { request =>
     service.update(id).invoke(request.body).map { id =>
-      Accepted(Json.toJson(id))
+      Accepted
     }
   }
 }

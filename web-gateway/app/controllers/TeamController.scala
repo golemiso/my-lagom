@@ -3,42 +3,45 @@ package controllers
 import java.util.UUID
 
 import com.golemiso.mylagom.team.api.{Team, TeamRequest, TeamService}
-import domain.{TeamID, TeamRepository, Team => DomainTeam}
+import com.lightbend.lagom.scaladsl.api.transport.NotFound
+import domain.{TeamID, Team => DomainTeam}
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
 
-class TeamController(mcc: MessagesControllerComponents, service: TeamService, repository: TeamRepository)(implicit ec: ExecutionContext) extends MessagesAbstractController(mcc) {
+class TeamController(mcc: MessagesControllerComponents, service: TeamService)(implicit ec: ExecutionContext) extends MessagesAbstractController(mcc) {
 
   def get(id: Team.Id): Action[AnyContent] = Action.async { _ =>
     service.read(id).invoke.map { team =>
       Ok(Json.toJson(team))
+    }.recover {
+      case _ : NotFound =>
+        NotFound
     }
   }
 
-  def delete(id: UUID): Action[AnyContent] = Action.async { implicit request: MessagesRequest[AnyContent] =>
-    repository.deleteBy(TeamID(id)).map { _ =>
+  def delete(id: Team.Id): Action[AnyContent] = Action.async { _ =>
+    service.delete(id).invoke().map { _ =>
       NoContent
     }
   }
 
-  def getAll: Action[AnyContent] = Action.async { implicit request: MessagesRequest[AnyContent] =>
-    repository.resolve.map { teams =>
-      Ok(Json.toJson[Seq[TeamResource]](teams))
+  def getAll: Action[AnyContent] = Action.async { _=>
+    service.readAll.invoke.map { teams =>
+      Ok(Json.toJson(teams))
     }
   }
 
   def post(): Action[TeamRequest] = Action.async(parse.json[TeamRequest]) { request =>
-    service.createNew().invoke(request.body).map { id =>
+    service.create().invoke(request.body).map { id =>
       Created(Json.toJson(id))
     }
   }
 
-  def put(id: UUID): Action[TeamResource] = Action.async(parse.json[TeamResource]) { implicit request: MessagesRequest[TeamResource] =>
-    val teamResource = request.body
-    repository.store(teamResource).map { team =>
-      Accepted(Json.toJson[TeamResource](team))
+  def put(id: Team.Id): Action[TeamRequest] = Action.async(parse.json[TeamRequest]) { request =>
+    service.update(id).invoke(request.body).map { id =>
+      Accepted
     }
   }
 }

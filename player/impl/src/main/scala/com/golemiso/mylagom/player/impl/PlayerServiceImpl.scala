@@ -26,20 +26,6 @@ class PlayerServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
     }
   }
 
-  override def readAll = ServiceCall { _ =>
-    // Note this should never make production....
-    currentIdsQuery.currentPersistenceIds()
-      .filter(_.startsWith("PlayerEntity|"))
-      .mapAsync(4) { id =>
-        val entityId = id.split("\\|", 2).last
-        registry.refFor[PlayerEntity](entityId)
-          .ask(PlayerCommand.Read)
-      }.collect {
-        case Some(player) => player
-      }
-      .runWith(Sink.seq)
-  }
-
   override def read(id: Player.Id) = ServiceCall { _ =>
     refFor(id).ask(PlayerCommand.Read).map {
       case Some(player) =>
@@ -50,13 +36,25 @@ class PlayerServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
   }
 
   override def update(id: Player.Id) = ServiceCall { request =>
-    refFor(id).ask(PlayerCommand.Update(request(id))).map { _ =>
-      id
-    }
+    refFor(id).ask(PlayerCommand.Update(request(id))).map { _ => NotUsed }
   }
 
   override def delete(id: Player.Id) = ServiceCall { _ =>
     refFor(id).ask(PlayerCommand.Delete).map { _ => NotUsed }
+  }
+
+  override def readAll = ServiceCall { _ =>
+    // Note this should never make production....
+    currentIdsQuery.currentPersistenceIds()
+      .filter(_.startsWith("PlayerEntity|"))
+      .mapAsync(4) { id =>
+        val entityId = id.split("\\|", 2).last
+        registry.refFor[PlayerEntity](entityId)
+          .ask(PlayerCommand.Read)
+      }.collect {
+      case Some(player) => player
+    }
+      .runWith(Sink.seq)
   }
 
   private def refFor(id: Player.Id) = registry.refFor[PlayerEntity](id.id.toString)

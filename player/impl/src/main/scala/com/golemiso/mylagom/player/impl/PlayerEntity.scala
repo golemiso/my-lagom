@@ -21,8 +21,12 @@ class PlayerEntity extends PersistentEntity {
       }.onCommand[PlayerCommand.Update, Done] {
         case (PlayerCommand.Update(player), ctx, _) =>
           ctx.thenPersist(PlayerEvent.Updated(player))(_ => ctx.reply(Done))
+      }.onCommand[PlayerCommand.Delete.type, Done] {
+        case (PlayerCommand.Delete, ctx, _) =>
+          ctx.thenPersist(PlayerEvent.Deleted)(_ => ctx.reply(Done))
       }.onEvent {
         case (PlayerEvent.Updated(player), _) => Some(player)
+        case (PlayerEvent.Deleted, _) => None
       }
     case None =>
       Actions().onReadOnlyCommand[PlayerCommand.Read.type, Option[Player]] {
@@ -30,12 +34,15 @@ class PlayerEntity extends PersistentEntity {
       }.onCommand[PlayerCommand.Create, Done] {
         case (PlayerCommand.Create(player), ctx, _) =>
           ctx.thenPersist(PlayerEvent.Created(player))(_ => ctx.reply(Done))
+      }.onCommand[PlayerCommand.Update, Done] {
+        case (PlayerCommand.Update(player), ctx, _) =>
+          ctx.thenPersist(PlayerEvent.Updated(player))(_ => ctx.reply(Done))
       }.onEvent {
         case (PlayerEvent.Created(player), _) => Some(player)
+        case (PlayerEvent.Updated(player), _) => Some(player)
       }
   }
 }
-
 
 sealed trait PlayerCommand
 object PlayerCommand {
@@ -49,6 +56,7 @@ sealed trait PlayerEvent
 object PlayerEvent {
   case class Created(player: Player) extends PlayerEvent
   case class Updated(player: Player) extends PlayerEvent
+  case object Deleted extends PlayerEvent
 }
 
 object PlayerSerializerRegistry extends JsonSerializerRegistry {

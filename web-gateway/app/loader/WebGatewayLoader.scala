@@ -1,5 +1,6 @@
 package loader
 
+import com.golemiso.mylagom.battle.api.BattleService
 import com.golemiso.mylagom.competition.api.CompetitionService
 import com.golemiso.mylagom.team.api.TeamService
 import com.golemiso.mylagom.player.api.PlayerService
@@ -52,6 +53,7 @@ abstract class WebGateway(context: Context) extends BuiltInComponentsFromContext
 
   lazy val playerService: PlayerService = serviceClient.implement[PlayerService]
   lazy val teamService: TeamService = serviceClient.implement[TeamService]
+  lazy val battleService: BattleService = serviceClient.implement[BattleService]
   lazy val competitionService: CompetitionService = serviceClient.implement[CompetitionService]
 
   lazy val messagesActionBuilder: MessagesActionBuilder = wire[WebGatewayMessagesActionBuilder]
