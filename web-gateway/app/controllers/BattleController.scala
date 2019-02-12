@@ -1,13 +1,9 @@
 package controllers
 
-import java.util.UUID
-
 import com.golemiso.mylagom.battle.api.{Battle, BattleRequest, BattleService}
 import com.lightbend.lagom.scaladsl.api.transport.NotFound
-import domain._
-import domain.{Battle => DomainBattle}
 import play.api.mvc._
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.Json
 
 import scala.concurrent.ExecutionContext
 

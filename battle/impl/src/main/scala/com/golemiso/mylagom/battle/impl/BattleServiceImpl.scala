@@ -57,5 +57,10 @@ class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
       .runWith(Sink.seq)
   }
 
+  override def updateResult(id: Battle.Id) = ServiceCall { result =>
+    refForResult(id).ask(ResultCommand.Update(result)).map { _ => NotUsed }
+  }
+
   private def refFor(id: Battle.Id) = registry.refFor[BattleEntity](id.id.toString)
+  private def refForResult(id: Battle.Id) = registry.refFor[ResultEntity](id.id.toString)
 }

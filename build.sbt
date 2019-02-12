@@ -52,6 +52,7 @@ lazy val `battle-api` = (project in file("battle/api"))
       lagomScaladslApi
     )
   )
+  .dependsOn(`team-api`)
 
 lazy val `battle-impl` = (project in file("battle/impl"))
   .enablePlugins(LagomScala)

@@ -2,11 +2,11 @@ package com.golemiso.mylagom.battle.impl
 
 import akka.Done
 import com.golemiso.mylagom.battle.api.Battle
-import com.lightbend.lagom.scaladsl.persistence.PersistentEntity
+import com.lightbend.lagom.scaladsl.persistence.{PersistentEntity, PersistentEntityRegistry}
 import com.lightbend.lagom.scaladsl.playjson.{JsonSerializer, JsonSerializerRegistry}
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity.ReplyType
 
-class BattleEntity extends PersistentEntity {
+class BattleEntity(registry: PersistentEntityRegistry) extends PersistentEntity {
   override type Command = BattleCommand
   override type Event = BattleEvent
   override type State = Option[Battle]
@@ -21,6 +21,9 @@ class BattleEntity extends PersistentEntity {
       }.onCommand[BattleCommand.Update, Done] {
         case (BattleCommand.Update(battle), ctx, _) =>
           ctx.thenPersist(BattleEvent.Updated(battle))(_ => ctx.reply(Done))
+      }.onCommand[BattleCommand.UpdateResult, Done] {
+        case (BattleCommand.UpdateResult(result), ctx, Some(battle)) =>
+          ctx.thenPersist(BattleEvent.Updated(battle(result)))(_ => ctx.reply(Done))
       }.onCommand[BattleCommand.Delete.type, Done] {
         case (BattleCommand.Delete, ctx, _) =>
           ctx.thenPersist(BattleEvent.Deleted)(_ => ctx.reply(Done))
@@ -50,6 +53,8 @@ object BattleCommand {
   case object Read extends BattleCommand with ReplyType[Option[Battle]]
   case class Update(battle: Battle) extends BattleCommand with ReplyType[Done]
   case object Delete extends BattleCommand with ReplyType[Done]
+
+  case class UpdateResult(result: Battle.Result) extends BattleCommand with ReplyType[Done]
 }
 
 sealed trait BattleEvent

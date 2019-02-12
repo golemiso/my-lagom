@@ -2,9 +2,12 @@ package com.golemiso.mylagom.battle.api
 
 import java.util.UUID
 
-import play.api.libs.json.{Format, Json}
+import com.golemiso.mylagom.team.api.Team
+import play.api.libs.json._
 
-case class Battle(id: Battle.Id, slug: Battle.Slug, name: Battle.Name)
+case class Battle(id: Battle.Id, slug: Battle.Slug, name: Battle.Name, mode: Battle.Mode, teams: Seq[Team.Id], result: Option[Battle.Result]) {
+  def apply(result: Battle.Result): Battle = Battle(id, slug, name, mode, teams, Some(result))
+}
 object Battle {
   implicit val format: Format[Battle] = Json.format
 
@@ -22,10 +25,31 @@ object Battle {
   object Name {
     implicit  val format: Format[Name] = Json.valueFormat
   }
+
+  sealed abstract class Mode(val value: String)
+  object Mode extends {
+    case object TurfWar extends Mode("turf_war")
+    case object SplatZones extends Mode("splat_zones")
+    case object TowerControl extends Mode("tower_control")
+    case object Rainmaker extends Mode("rainmaker")
+    case object ClamBlitz extends Mode("clam_blitz")
+    case object Unknown extends Mode("unknown")
+    val all: Seq[Mode] = TurfWar :: SplatZones :: TowerControl :: Rainmaker :: ClamBlitz :: Nil
+    def apply(mode: String): Mode = all.find(_.value == mode).getOrElse(Unknown)
+
+    implicit val format: Format[Mode] = Format(
+      Reads(jsValue => Json.fromJson(jsValue).map(Mode.apply)),
+      Writes(mode => Json.toJson(mode.value)))
+  }
+
+  case class Result(victory: Team.Id, defeat: Team.Id)
+  object Result {
+    implicit val format: Format[Result] = Json.format
+  }
 }
 
-case class BattleRequest(slug: Battle.Slug, name: Battle.Name) {
-  def apply(id: Battle.Id) = Battle(id, slug, name)
+case class BattleRequest(slug: Battle.Slug, name: Battle.Name, mode: Battle.Mode, teams: Seq[Team.Id]) {
+  def apply(id: Battle.Id) = Battle(id, slug, name, mode, teams, None)
 }
 object BattleRequest {
   implicit val format: Format[BattleRequest] = Json.format

@@ -11,6 +11,7 @@ trait BattleService extends Service {
   def delete(id: Battle.Id): ServiceCall[NotUsed, NotUsed]
 
   def readAll: ServiceCall[NotUsed, Seq[Battle]]
+  def updateResult(id: Battle.Id): ServiceCall[Battle.Result, NotUsed]
 
   def descriptor: Descriptor = {
     import Service._
