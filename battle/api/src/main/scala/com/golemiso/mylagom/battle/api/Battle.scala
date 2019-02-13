@@ -35,11 +35,11 @@ object Battle {
     case object ClamBlitz extends Mode("clam_blitz")
     case object Unknown extends Mode("unknown")
     val all: Seq[Mode] = TurfWar :: SplatZones :: TowerControl :: Rainmaker :: ClamBlitz :: Nil
-    def apply(mode: String): Mode = all.find(_.value == mode).getOrElse(Unknown)
+    def apply(value: String): Mode = all.find(_.value == value).getOrElse(Unknown)
+    def unapply(mode: Mode): Option[String] = Some(mode.value)
 
-    implicit val format: Format[Mode] = Format(
-      Reads(jsValue => Json.fromJson(jsValue).map(Mode.apply)),
-      Writes(mode => Json.toJson(mode.value)))
+    implicit val format: Format[Mode] =
+      Format(Reads.StringReads.map(Mode.apply), Writes.StringWrites.contramap(_.value))
   }
 
   case class Result(victory: Team.Id, defeat: Team.Id)
