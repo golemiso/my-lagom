@@ -11,8 +11,8 @@ import play.api.libs.ws.ahc.AhcWSComponents
 
 abstract class PlayerApplication(context: LagomApplicationContext)
   extends LagomApplication(context)
-    with AhcWSComponents
-    with CassandraPersistenceComponents {
+  with AhcWSComponents
+  with CassandraPersistenceComponents {
 
   override lazy val lagomServer: LagomServer = serverFor[PlayerService](wire[PlayerServiceImpl])
   override lazy val jsonSerializerRegistry = PlayerSerializerRegistry
@@ -22,7 +22,7 @@ abstract class PlayerApplication(context: LagomApplicationContext)
 
 class PlayerApplicationLoader extends LagomApplicationLoader {
   override def load(context: LagomApplicationContext) =
-    new PlayerApplication(context)  {
+    new PlayerApplication(context) {
       override def serviceLocator: ServiceLocator = NoServiceLocator
     }
 

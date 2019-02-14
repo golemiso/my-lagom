@@ -4,29 +4,29 @@ import com.golemiso.mylagom.battle.api.BattleService
 import com.golemiso.mylagom.competition.api.CompetitionService
 import com.golemiso.mylagom.team.api.TeamService
 import com.golemiso.mylagom.player.api.PlayerService
-import com.lightbend.lagom.scaladsl.api.{LagomConfigComponent, ServiceAcl, ServiceInfo}
+import com.lightbend.lagom.scaladsl.api.{ LagomConfigComponent, ServiceAcl, ServiceInfo }
 import com.lightbend.lagom.scaladsl.client.LagomServiceClientComponents
 import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
 import com.softwaremill.macwire._
 import com.typesafe.config.Config
-import controllers.{AssetsComponents, BattleController, CompetitionController, PlayerController, RankingController, TeamController}
-import domain.{BattleRepository, PlayerRepository, TeamRepository}
-import infra.mongodb.{MongoDBBattleRepository, MongoDBPlayerRepository, MongoDBTeamRepository}
+import controllers.{ AssetsComponents, BattleController, CompetitionController, PlayerController, RankingController, TeamController }
+import domain.{ BattleRepository, PlayerRepository, TeamRepository }
+import infra.mongodb.{ MongoDBBattleRepository, MongoDBPlayerRepository, MongoDBTeamRepository }
 import play.api.ApplicationLoader.Context
 import play.api.http.FileMimeTypes
 import play.api.i18n._
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.mvc._
 import play.api.routing.Router
-import play.api.{Application, ApplicationLoader, BuiltInComponentsFromContext, LoggerConfigurator}
+import play.api.{ Application, ApplicationLoader, BuiltInComponentsFromContext, LoggerConfigurator }
 import play.filters.HttpFiltersComponents
-import play.filters.cors.{CORSConfig, CORSFilter}
-import reactivemongo.api.{DefaultDB, MongoConnection, MongoDriver}
+import play.filters.cors.{ CORSConfig, CORSFilter }
+import reactivemongo.api.{ DefaultDB, MongoConnection, MongoDriver }
 import router.Routes
 import service.PlayerRecordService
 
 import scala.collection.immutable
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 abstract class WebGateway(context: Context) extends BuiltInComponentsFromContext(context)
   with DBComponents
@@ -40,9 +40,7 @@ abstract class WebGateway(context: Context) extends BuiltInComponentsFromContext
   override lazy val serviceInfo: ServiceInfo = ServiceInfo(
     "web-gateway",
     Map(
-      "web-gateway" -> immutable.Seq(ServiceAcl.forPathRegex("(?!/api/).*"))
-    )
-  )
+      "web-gateway" -> immutable.Seq(ServiceAcl.forPathRegex("(?!/api/).*"))))
 
   override lazy val httpFilters: Seq[EssentialFilter] = Seq(new CORSFilter(CORSConfig.fromConfiguration(configuration), httpErrorHandler))
 
@@ -101,7 +99,6 @@ trait DBComponents {
   lazy val driver: MongoDriver = new MongoDriver(Some(config), None)
   lazy val db: Future[DefaultDB] = {
     import scala.concurrent.ExecutionContext.Implicits.global
-
 
     val parsedUri = MongoConnection.parseURI(config.getString("mongodb.uri"))
 

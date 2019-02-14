@@ -13,17 +13,17 @@ object Battle {
 
   case class Id(id: UUID) extends AnyVal
   object Id {
-    implicit  val format: Format[Id] = Json.valueFormat
+    implicit val format: Format[Id] = Json.valueFormat
   }
 
   case class Slug(slug: String) extends AnyVal
   object Slug {
-    implicit  val format: Format[Slug] = Json.valueFormat
+    implicit val format: Format[Slug] = Json.valueFormat
   }
 
   case class Name(name: String) extends AnyVal
   object Name {
-    implicit  val format: Format[Name] = Json.valueFormat
+    implicit val format: Format[Name] = Json.valueFormat
   }
 
   sealed abstract class Mode(val value: String)

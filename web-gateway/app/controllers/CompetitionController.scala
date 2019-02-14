@@ -1,8 +1,8 @@
 package controllers
 
-import com.golemiso.mylagom.competition.api.{Competition, CompetitionRequest, CompetitionService}
+import com.golemiso.mylagom.competition.api.{ Competition, CompetitionRequest, CompetitionService }
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, MessagesAbstractController, MessagesControllerComponents}
+import play.api.mvc.{ Action, AnyContent, MessagesAbstractController, MessagesControllerComponents }
 
 import scala.concurrent.ExecutionContext
 

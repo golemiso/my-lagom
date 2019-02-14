@@ -2,7 +2,7 @@ package com.golemiso.mylagom.competition.api
 
 import java.util.UUID
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{ Format, Json }
 
 case class Competition(id: Competition.Id, slug: Competition.Slug, name: Competition.Name)
 object Competition {

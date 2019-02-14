@@ -2,10 +2,10 @@ package controllers
 
 import java.util.UUID
 
-import com.golemiso.mylagom.team.api.{Team, TeamRequest, TeamService}
+import com.golemiso.mylagom.team.api.{ Team, TeamRequest, TeamService }
 import com.lightbend.lagom.scaladsl.api.transport.NotFound
-import domain.{TeamID, Team => DomainTeam}
-import play.api.libs.json.{Json, OFormat}
+import domain.{ TeamID, Team => DomainTeam }
+import play.api.libs.json.{ Json, OFormat }
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
@@ -16,7 +16,7 @@ class TeamController(mcc: MessagesControllerComponents, service: TeamService)(im
     service.read(id).invoke.map { team =>
       Ok(Json.toJson(team))
     }.recover {
-      case _ : NotFound =>
+      case _: NotFound =>
         NotFound
     }
   }
@@ -27,7 +27,7 @@ class TeamController(mcc: MessagesControllerComponents, service: TeamService)(im
     }
   }
 
-  def getAll: Action[AnyContent] = Action.async { _=>
+  def getAll: Action[AnyContent] = Action.async { _ =>
     service.readAll.invoke.map { teams =>
       Ok(Json.toJson(teams))
     }

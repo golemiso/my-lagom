@@ -2,7 +2,7 @@ package com.golemiso.mylagom.team.api
 
 import akka.NotUsed
 import com.lightbend.lagom.scaladsl.api.transport.Method
-import com.lightbend.lagom.scaladsl.api.{Descriptor, Service, ServiceCall}
+import com.lightbend.lagom.scaladsl.api.{ Descriptor, Service, ServiceCall }
 
 trait TeamService extends Service {
   def create(): ServiceCall[TeamRequest, Team.Id]
@@ -20,7 +20,6 @@ trait TeamService extends Service {
       restCall(Method.POST, "/api/teams/:id", update _),
       restCall(Method.DELETE, "/api/teams/:id", delete _),
 
-      restCall(Method.GET, "/api/teams", readAll)
-    )
+      restCall(Method.GET, "/api/teams", readAll))
   }
 }

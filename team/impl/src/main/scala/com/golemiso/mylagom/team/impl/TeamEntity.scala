@@ -4,7 +4,7 @@ import akka.Done
 import com.golemiso.mylagom.team.api.Team
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity.ReplyType
-import com.lightbend.lagom.scaladsl.playjson.{JsonSerializer, JsonSerializerRegistry}
+import com.lightbend.lagom.scaladsl.playjson.{ JsonSerializer, JsonSerializerRegistry }
 
 class TeamEntity extends PersistentEntity {
   override type Command = TeamCommand
@@ -62,6 +62,5 @@ object TeamEvent {
 
 object TeamSerializerRegistry extends JsonSerializerRegistry {
   override def serializers = List(
-    JsonSerializer[Team]
-  )
+    JsonSerializer[Team])
 }

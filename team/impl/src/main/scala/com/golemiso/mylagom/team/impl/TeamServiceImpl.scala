@@ -53,11 +53,10 @@ class TeamServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)(i
         registry.refFor[TeamEntity](entityId)
           .ask(TeamCommand.Read)
       }.collect {
-      case Some(team) => team
-    }
+        case Some(team) => team
+      }
       .runWith(Sink.seq)
   }
-
 
   private def refFor(id: Id) = registry.refFor[TeamEntity](id.id.toString)
 }

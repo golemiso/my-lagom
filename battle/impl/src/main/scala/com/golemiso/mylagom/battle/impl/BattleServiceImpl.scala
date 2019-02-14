@@ -9,12 +9,12 @@ import akka.persistence.query.PersistenceQuery
 import akka.stream.Materializer
 import akka.stream.scaladsl.Sink
 import com.golemiso.mylagom.battle.api
-import com.golemiso.mylagom.battle.api.{Battle, BattleService}
+import com.golemiso.mylagom.battle.api.{ Battle, BattleService }
 import com.lightbend.lagom.scaladsl.api.ServiceCall
 import com.lightbend.lagom.scaladsl.api.broker.Topic
 import com.lightbend.lagom.scaladsl.api.transport.NotFound
 import com.lightbend.lagom.scaladsl.broker.TopicProducer
-import com.lightbend.lagom.scaladsl.persistence.{EventStreamElement, PersistentEntityRegistry}
+import com.lightbend.lagom.scaladsl.persistence.{ EventStreamElement, PersistentEntityRegistry }
 
 import scala.collection.immutable
 import scala.concurrent.ExecutionContext
@@ -52,8 +52,8 @@ class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
         registry.refFor[BattleEntity](entityId)
           .ask(BattleCommand.Read)
       }.collect {
-      case Some(battle) => battle
-    }
+        case Some(battle) => battle
+      }
       .runWith(Sink.seq)
   }
 

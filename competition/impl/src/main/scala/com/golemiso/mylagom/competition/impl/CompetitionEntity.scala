@@ -4,7 +4,7 @@ import akka.Done
 import com.golemiso.mylagom.competition.api.Competition
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity.ReplyType
-import com.lightbend.lagom.scaladsl.playjson.{JsonSerializer, JsonSerializerRegistry}
+import com.lightbend.lagom.scaladsl.playjson.{ JsonSerializer, JsonSerializerRegistry }
 import play.api.libs.json.Format
 
 class CompetitionEntity extends PersistentEntity {
@@ -49,6 +49,5 @@ object CompetitionEvent {
 
 object CompetitionSerializerRegistry extends JsonSerializerRegistry {
   override def serializers = List(
-    JsonSerializer[Competition]
-  )
+    JsonSerializer[Competition])
 }

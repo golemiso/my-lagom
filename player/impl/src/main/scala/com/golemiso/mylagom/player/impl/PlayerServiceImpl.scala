@@ -52,8 +52,8 @@ class PlayerServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
         registry.refFor[PlayerEntity](entityId)
           .ask(PlayerCommand.Read)
       }.collect {
-      case Some(player) => player
-    }
+        case Some(player) => player
+      }
       .runWith(Sink.seq)
   }
 

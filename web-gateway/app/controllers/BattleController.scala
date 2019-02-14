@@ -1,6 +1,6 @@
 package controllers
 
-import com.golemiso.mylagom.battle.api.{Battle, BattleRequest, BattleService}
+import com.golemiso.mylagom.battle.api.{ Battle, BattleRequest, BattleService }
 import com.lightbend.lagom.scaladsl.api.transport.NotFound
 import play.api.mvc._
 import play.api.libs.json.Json
@@ -13,7 +13,7 @@ class BattleController(mcc: MessagesControllerComponents, service: BattleService
     service.read(id).invoke.map { battle =>
       Ok(Json.toJson(battle))
     }.recover {
-      case _ : NotFound =>
+      case _: NotFound =>
         NotFound
     }
   }

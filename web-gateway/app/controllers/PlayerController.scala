@@ -11,9 +11,9 @@ class PlayerController(mcc: MessagesControllerComponents, service: PlayerService
 
   def get(id: Player.Id): Action[AnyContent] = Action.async { _ =>
     service.read(id).invoke.map { player =>
-        Ok(Json.toJson(player))
+      Ok(Json.toJson(player))
     }.recover {
-      case _ : NotFound =>
+      case _: NotFound =>
         NotFound
     }
   }

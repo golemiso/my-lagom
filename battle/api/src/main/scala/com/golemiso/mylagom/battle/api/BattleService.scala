@@ -3,7 +3,7 @@ package com.golemiso.mylagom.battle.api
 import akka.NotUsed
 import com.lightbend.lagom.scaladsl.api.broker.Topic
 import com.lightbend.lagom.scaladsl.api.transport.Method
-import com.lightbend.lagom.scaladsl.api.{Descriptor, Service, ServiceCall}
+import com.lightbend.lagom.scaladsl.api.{ Descriptor, Service, ServiceCall }
 
 trait BattleService extends Service {
   def create(): ServiceCall[BattleRequest, Battle.Id]
@@ -23,9 +23,7 @@ trait BattleService extends Service {
       restCall(Method.DELETE, "/api/battles/:id", delete _),
 
       restCall(Method.GET, "/api/battles", readAll),
-      restCall(Method.PATCH, "/api/battles/:id/result", updateResult _)
-    ).withTopics(
-      topic("BattleEvent", this.events)
-    )
+      restCall(Method.PATCH, "/api/battles/:id/result", updateResult _)).withTopics(
+        topic("BattleEvent", this.events))
   }
 }

@@ -5,14 +5,14 @@ import com.lightbend.lagom.scaladsl.api.ServiceLocator
 import com.lightbend.lagom.scaladsl.api.ServiceLocator.NoServiceLocator
 import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
 import com.lightbend.lagom.scaladsl.persistence.cassandra.CassandraPersistenceComponents
-import com.lightbend.lagom.scaladsl.server.{LagomApplication, LagomApplicationContext, LagomApplicationLoader, LagomServer}
+import com.lightbend.lagom.scaladsl.server.{ LagomApplication, LagomApplicationContext, LagomApplicationLoader, LagomServer }
 import com.softwaremill.macwire.wire
 import play.api.libs.ws.ahc.AhcWSComponents
 
 abstract class CompetitionApplication(context: LagomApplicationContext)
   extends LagomApplication(context)
-    with AhcWSComponents
-    with CassandraPersistenceComponents {
+  with AhcWSComponents
+  with CassandraPersistenceComponents {
 
   override lazy val lagomServer: LagomServer = serverFor[CompetitionService](wire[CompetitionServiceImpl])
   override lazy val jsonSerializerRegistry = CompetitionSerializerRegistry
@@ -22,7 +22,7 @@ abstract class CompetitionApplication(context: LagomApplicationContext)
 
 class CompetitionApplicationLoader extends LagomApplicationLoader {
   override def load(context: LagomApplicationContext) =
-    new CompetitionApplication(context)  {
+    new CompetitionApplication(context) {
       override def serviceLocator: ServiceLocator = NoServiceLocator
     }
 

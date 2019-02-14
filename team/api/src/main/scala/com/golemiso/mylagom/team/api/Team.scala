@@ -3,7 +3,7 @@ package com.golemiso.mylagom.team.api
 import java.util.UUID
 
 import com.golemiso.mylagom.player.api.Player
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{ Format, Json }
 
 case class Team(id: Team.Id, slug: Team.Slug, name: Team.Name, players: Seq[Player.Id])
 object Team {

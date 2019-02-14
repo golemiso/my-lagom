@@ -2,7 +2,7 @@ package com.golemiso.mylagom.player.api
 
 import akka.NotUsed
 import com.lightbend.lagom.scaladsl.api.transport.Method
-import com.lightbend.lagom.scaladsl.api.{Descriptor, Service, ServiceCall}
+import com.lightbend.lagom.scaladsl.api.{ Descriptor, Service, ServiceCall }
 
 trait PlayerService extends Service {
   def create(): ServiceCall[PlayerRequest, Player.Id]
@@ -20,7 +20,6 @@ trait PlayerService extends Service {
       restCall(Method.PUT, "/api/players/:id", update _),
       restCall(Method.DELETE, "/api/players/:id", delete _),
 
-      restCall(Method.GET, "/api/players", readAll)
-    )
+      restCall(Method.GET, "/api/players", readAll))
   }
 }
