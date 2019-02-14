@@ -36,8 +36,8 @@ class BattleController(mcc: MessagesControllerComponents, service: BattleService
     }
   }
 
-  def put(id: Battle.Id): Action[BattleRequest] = Action.async(parse.json[BattleRequest]) { request =>
-    service.update(id).invoke(request.body).map { id =>
+  def patchResult(id: Battle.Id): Action[Battle.Result] = Action.async(parse.json[Battle.Result]) { request =>
+    service.updateResult(id).invoke(request.body).map { _ =>
       Accepted
     }
   }

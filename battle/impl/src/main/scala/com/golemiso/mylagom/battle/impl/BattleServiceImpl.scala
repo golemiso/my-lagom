@@ -8,11 +8,15 @@ import akka.persistence.cassandra.query.scaladsl.CassandraReadJournal
 import akka.persistence.query.PersistenceQuery
 import akka.stream.Materializer
 import akka.stream.scaladsl.Sink
-import com.golemiso.mylagom.battle.api._
+import com.golemiso.mylagom.battle.api
+import com.golemiso.mylagom.battle.api.{Battle, BattleService}
 import com.lightbend.lagom.scaladsl.api.ServiceCall
+import com.lightbend.lagom.scaladsl.api.broker.Topic
 import com.lightbend.lagom.scaladsl.api.transport.NotFound
-import com.lightbend.lagom.scaladsl.persistence.PersistentEntityRegistry
+import com.lightbend.lagom.scaladsl.broker.TopicProducer
+import com.lightbend.lagom.scaladsl.persistence.{EventStreamElement, PersistentEntityRegistry}
 
+import scala.collection.immutable
 import scala.concurrent.ExecutionContext
 
 class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)(implicit ec: ExecutionContext, mat: Materializer) extends BattleService {
@@ -35,10 +39,6 @@ class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
     }
   }
 
-  override def update(id: Battle.Id) = ServiceCall { request =>
-    refFor(id).ask(BattleCommand.Update(request(id))).map { _ => NotUsed }
-  }
-
   override def delete(id: Battle.Id) = ServiceCall { _ =>
     refFor(id).ask(BattleCommand.Delete).map { _ => NotUsed }
   }
@@ -58,9 +58,16 @@ class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
   }
 
   override def updateResult(id: Battle.Id) = ServiceCall { result =>
-    refForResult(id).ask(ResultCommand.Update(result)).map { _ => NotUsed }
+    refFor(id).ask(BattleCommand.UpdateResult(result)).map { _ => NotUsed }
+  }
+
+  override def events: Topic[api.BattleEvent] = TopicProducer.singleStreamWithOffset { fromOffset =>
+    registry.eventStream(BattleEvent.Tag, fromOffset).mapConcat {
+      case EventStreamElement(_, BattleEvent.ResultUpdated(battle), offset) =>
+        immutable.Seq((api.BattleEvent.ResultUpdated(battle), offset))
+      case _ => Nil
+    }
   }
 
   private def refFor(id: Battle.Id) = registry.refFor[BattleEntity](id.id.toString)
-  private def refForResult(id: Battle.Id) = registry.refFor[ResultEntity](id.id.toString)
 }

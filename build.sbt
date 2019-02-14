@@ -5,6 +5,7 @@ version in ThisBuild := "1.0-SNAPSHOT"
 // the Scala version that will be used for cross-compiled libraries
 scalaVersion in ThisBuild := "2.12.4"
 
+val playJsonDerivedCodecs = "org.julienrf" %% "play-json-derived-codecs" % "5.0.0"
 val macwire = "com.softwaremill.macwire" %% "macros" % "2.3.0" % "provided"
 val scalaTest = "org.scalatest" %% "scalatest" % "3.0.4" % Test
 val scalaTestPlusPlay = "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
@@ -49,7 +50,8 @@ lazy val `team-impl` = (project in file("team/impl"))
 lazy val `battle-api` = (project in file("battle/api"))
   .settings(
     libraryDependencies ++= Seq(
-      lagomScaladslApi
+      lagomScaladslApi,
+      playJsonDerivedCodecs
     )
   )
   .dependsOn(`team-api`)
@@ -59,6 +61,7 @@ lazy val `battle-impl` = (project in file("battle/impl"))
   .settings(
     libraryDependencies ++= Seq(
       lagomScaladslPersistenceCassandra,
+      lagomScaladslKafkaBroker,
       macwire,
       scalaTest
     )

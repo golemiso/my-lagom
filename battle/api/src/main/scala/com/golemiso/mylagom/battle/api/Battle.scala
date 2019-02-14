@@ -6,7 +6,7 @@ import com.golemiso.mylagom.team.api.Team
 import play.api.libs.json._
 
 case class Battle(id: Battle.Id, slug: Battle.Slug, name: Battle.Name, mode: Battle.Mode, teams: Seq[Team.Id], result: Option[Battle.Result]) {
-  def apply(result: Battle.Result): Battle = Battle(id, slug, name, mode, teams, Some(result))
+  def apply(result: Battle.Result): Battle = copy(result = Some(result))
 }
 object Battle {
   implicit val format: Format[Battle] = Json.format
