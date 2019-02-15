@@ -10,12 +10,20 @@ val macwire = "com.softwaremill.macwire" %% "macros" % "2.3.0" % "provided"
 val scalaTest = "org.scalatest" %% "scalatest" % "3.0.4" % Test
 val scalaTestPlusPlay = "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
 
+lazy val `common` = (project in file("common"))
+  .settings(
+    libraryDependencies ++= Seq(
+      playJsonDerivedCodecs
+    )
+  )
+
 lazy val `player-api` = (project in file("player/api"))
   .settings(
     libraryDependencies ++= Seq(
       lagomScaladslApi
     )
   )
+  .dependsOn(`common`)
 
 lazy val `player-impl` = (project in file("player/impl"))
   .enablePlugins(LagomScala)
@@ -34,7 +42,7 @@ lazy val `team-api` = (project in file("team/api"))
       lagomScaladslApi
     )
   )
-  .dependsOn(`player-api`)
+  .dependsOn(`common`)
 
 lazy val `team-impl` = (project in file("team/impl"))
   .enablePlugins(LagomScala)
@@ -54,7 +62,7 @@ lazy val `battle-api` = (project in file("battle/api"))
       playJsonDerivedCodecs
     )
   )
-  .dependsOn(`team-api`)
+  .dependsOn(`common`)
 
 lazy val `battle-impl` = (project in file("battle/impl"))
   .enablePlugins(LagomScala)
@@ -74,7 +82,7 @@ lazy val `competition-api` = (project in file("competition/api"))
       lagomScaladslApi
     )
   )
-  .dependsOn(`player-api`, `battle-api`)
+  .dependsOn(`common`)
 
 lazy val `competition-impl` = (project in file("competition/impl"))
   .enablePlugins(LagomScala)

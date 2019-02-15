@@ -1,5 +1,6 @@
 package controllers
 
+import com.golemiso.mylagom.model.Player
 import com.golemiso.mylagom.player.api._
 import com.lightbend.lagom.scaladsl.api.transport.NotFound
 import play.api.mvc._

@@ -1,7 +1,7 @@
 package com.golemiso.mylagom.battle.impl
 
 import akka.Done
-import com.golemiso.mylagom.battle.api.Battle
+import com.golemiso.mylagom.model.Battle
 import com.lightbend.lagom.scaladsl.persistence.{ AggregateEvent, AggregateEventTag, PersistentEntity, PersistentEntityRegistry }
 import com.lightbend.lagom.scaladsl.playjson.{ JsonSerializer, JsonSerializerRegistry }
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity.ReplyType

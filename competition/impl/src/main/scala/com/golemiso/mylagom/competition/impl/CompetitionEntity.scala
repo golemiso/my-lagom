@@ -1,7 +1,7 @@
 package com.golemiso.mylagom.competition.impl
 
 import akka.Done
-import com.golemiso.mylagom.competition.api.Competition
+import com.golemiso.mylagom.model.Competition
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity.ReplyType
 import com.lightbend.lagom.scaladsl.playjson.{ JsonSerializer, JsonSerializerRegistry }

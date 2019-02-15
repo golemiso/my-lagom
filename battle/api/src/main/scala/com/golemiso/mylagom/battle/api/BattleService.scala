@@ -1,6 +1,7 @@
 package com.golemiso.mylagom.battle.api
 
 import akka.NotUsed
+import com.golemiso.mylagom.model.Battle
 import com.lightbend.lagom.scaladsl.api.broker.Topic
 import com.lightbend.lagom.scaladsl.api.transport.Method
 import com.lightbend.lagom.scaladsl.api.{ Descriptor, Service, ServiceCall }

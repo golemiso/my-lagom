@@ -1,6 +1,7 @@
 package com.golemiso.mylagom.player.api
 
 import akka.NotUsed
+import com.golemiso.mylagom.model.Player
 import com.lightbend.lagom.scaladsl.api.transport.Method
 import com.lightbend.lagom.scaladsl.api.{ Descriptor, Service, ServiceCall }
 

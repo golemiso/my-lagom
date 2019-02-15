@@ -1,6 +1,7 @@
 package controllers
 
-import com.golemiso.mylagom.competition.api.{ Competition, CompetitionRequest, CompetitionService }
+import com.golemiso.mylagom.competition.api.{ CompetitionRequest, CompetitionService }
+import com.golemiso.mylagom.model.Competition
 import play.api.libs.json.Json
 import play.api.mvc.{ Action, AnyContent, MessagesAbstractController, MessagesControllerComponents }
 
@@ -15,7 +16,7 @@ class CompetitionController(mcc: MessagesControllerComponents, service: Competit
   }
 
   def post(): Action[CompetitionRequest] = Action.async(parse.json[CompetitionRequest]) { request =>
-    service.createNew().invoke(request.body).map { id =>
+    service.create().invoke(request.body).map { id =>
       Ok(Json.toJson(id))
     }
   }

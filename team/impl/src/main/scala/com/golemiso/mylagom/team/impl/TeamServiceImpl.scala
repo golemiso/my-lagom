@@ -8,7 +8,7 @@ import akka.persistence.cassandra.query.scaladsl.CassandraReadJournal
 import akka.persistence.query.PersistenceQuery
 import akka.stream.Materializer
 import akka.stream.scaladsl.Sink
-import com.golemiso.mylagom.team.api.Team.Id
+import com.golemiso.mylagom.model.Team
 import com.golemiso.mylagom.team.api.TeamService
 import com.lightbend.lagom.scaladsl.api.ServiceCall
 import com.lightbend.lagom.scaladsl.api.transport.NotFound
@@ -21,13 +21,13 @@ class TeamServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)(i
   private val currentIdsQuery = PersistenceQuery(system).readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
 
   override def create() = ServiceCall { request =>
-    val id = Id(UUID.randomUUID())
+    val id = Team.Id(UUID.randomUUID())
     refFor(id).ask(TeamCommand.Create(request(id))).map { _ =>
       id
     }
   }
 
-  override def read(id: Id) = ServiceCall { _ =>
+  override def read(id: Team.Id) = ServiceCall { _ =>
     refFor(id).ask(TeamCommand.Read).map {
       case Some(team) =>
         team
@@ -36,11 +36,11 @@ class TeamServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)(i
     }
   }
 
-  override def update(id: Id) = ServiceCall { request =>
+  override def update(id: Team.Id) = ServiceCall { request =>
     refFor(id).ask(TeamCommand.Update(request(id))).map { _ => NotUsed }
   }
 
-  override def delete(id: Id) = ServiceCall { _ =>
+  override def delete(id: Team.Id) = ServiceCall { _ =>
     refFor(id).ask(TeamCommand.Delete).map { _ => NotUsed }
   }
 
@@ -58,5 +58,5 @@ class TeamServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)(i
       .runWith(Sink.seq)
   }
 
-  private def refFor(id: Id) = registry.refFor[TeamEntity](id.id.toString)
+  private def refFor(id: Team.Id) = registry.refFor[TeamEntity](id.id.toString)
 }

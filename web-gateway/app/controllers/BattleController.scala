@@ -1,6 +1,7 @@
 package controllers
 
-import com.golemiso.mylagom.battle.api.{ Battle, BattleRequest, BattleService }
+import com.golemiso.mylagom.battle.api.{ BattleRequest, BattleService }
+import com.golemiso.mylagom.model.Battle
 import com.lightbend.lagom.scaladsl.api.transport.NotFound
 import play.api.mvc._
 import play.api.libs.json.Json

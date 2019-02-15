@@ -1,5 +1,6 @@
 package com.golemiso.mylagom.battle.api
 
+import com.golemiso.mylagom.model.Battle
 import play.api.libs.json._
 
 sealed trait BattleEvent

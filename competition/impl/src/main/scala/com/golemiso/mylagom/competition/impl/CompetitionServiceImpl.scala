@@ -13,7 +13,7 @@ import com.lightbend.lagom.scaladsl.persistence.PersistentEntityRegistry
 import scala.concurrent.ExecutionContext
 
 class CompetitionServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)(implicit ec: ExecutionContext, mat: Materializer) extends CompetitionService {
-  override def createNew() = ServiceCall { competition =>
+  override def create() = ServiceCall { competition =>
     val id = Id(UUID.randomUUID())
     refFor(id).ask(CompetitionCommand.Create(competition(id))).map { _ =>
       id

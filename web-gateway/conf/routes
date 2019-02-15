@@ -8,28 +8,28 @@
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
-GET     /players/:id                controllers.PlayerController.get(id: com.golemiso.mylagom.player.api.Player.Id)
-GET     /players/:id/detail         controllers.PlayerController.get(id: com.golemiso.mylagom.player.api.Player.Id)
-#GET     /players                    controllers.PlayerController.get(slug: com.golemiso.mylagom.player.api.PlayerSlug)
+GET     /players/:id                controllers.PlayerController.get(id: com.golemiso.mylagom.model.Player.Id)
+GET     /players/:id/detail         controllers.PlayerController.get(id: com.golemiso.mylagom.model.Player.Id)
+#GET     /players                    controllers.PlayerController.get(slug: com.golemiso.mylagom.model.PlayerSlug)
 GET     /players                    controllers.PlayerController.getAll
 POST    /players                    controllers.PlayerController.post()
-PUT     /players/:id                controllers.PlayerController.put(id: com.golemiso.mylagom.player.api.Player.Id)
-DELETE  /players/:id                controllers.PlayerController.delete(id: com.golemiso.mylagom.player.api.Player.Id)
+PUT     /players/:id                controllers.PlayerController.put(id: com.golemiso.mylagom.model.Player.Id)
+DELETE  /players/:id                controllers.PlayerController.delete(id: com.golemiso.mylagom.model.Player.Id)
 
-GET     /competitions/:id           controllers.CompetitionController.get(id: com.golemiso.mylagom.competition.api.Competition.Id)
+GET     /competitions/:id           controllers.CompetitionController.get(id: com.golemiso.mylagom.model.Competition.Id)
 POST    /competitions               controllers.CompetitionController.post()
 
-GET     /teams/:id                  controllers.TeamController.get(id: com.golemiso.mylagom.team.api.Team.Id)
-GET     /teams/:id/detail           controllers.TeamController.get(id: com.golemiso.mylagom.team.api.Team.Id)
+GET     /teams/:id                  controllers.TeamController.get(id: com.golemiso.mylagom.model.Team.Id)
+GET     /teams/:id/detail           controllers.TeamController.get(id: com.golemiso.mylagom.model.Team.Id)
 GET     /teams                      controllers.TeamController.getAll
 POST    /teams                      controllers.TeamController.post()
-PUT     /teams/:id                  controllers.TeamController.put(id: com.golemiso.mylagom.team.api.Team.Id)
-DELETE  /teams/:id                  controllers.TeamController.delete(id: com.golemiso.mylagom.team.api.Team.Id)
+PUT     /teams/:id                  controllers.TeamController.put(id: com.golemiso.mylagom.model.Team.Id)
+DELETE  /teams/:id                  controllers.TeamController.delete(id: com.golemiso.mylagom.model.Team.Id)
 
-GET     /battles/:id                controllers.BattleController.get(id: com.golemiso.mylagom.battle.api.Battle.Id)
+GET     /battles/:id                controllers.BattleController.get(id: com.golemiso.mylagom.model.Battle.Id)
 GET     /battles                    controllers.BattleController.getAll
 POST    /battles                    controllers.BattleController.post()
-DELETE  /battles/:id                controllers.BattleController.delete(id: com.golemiso.mylagom.battle.api.Battle.Id)
-PATCH   /battles/:id/result         controllers.BattleController.patchResult(id: com.golemiso.mylagom.battle.api.Battle.Id)
+DELETE  /battles/:id                controllers.BattleController.delete(id: com.golemiso.mylagom.model.Battle.Id)
+PATCH   /battles/:id/result         controllers.BattleController.patchResult(id: com.golemiso.mylagom.model.Battle.Id)
 
 GET     /rankings                   controllers.RankingController.get(rankBy: String)

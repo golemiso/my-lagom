@@ -9,7 +9,8 @@ import akka.persistence.query.PersistenceQuery
 import akka.stream.Materializer
 import akka.stream.scaladsl.Sink
 import com.golemiso.mylagom.battle.api
-import com.golemiso.mylagom.battle.api.{ Battle, BattleService }
+import com.golemiso.mylagom.battle.api.BattleService
+import com.golemiso.mylagom.model.Battle
 import com.lightbend.lagom.scaladsl.api.ServiceCall
 import com.lightbend.lagom.scaladsl.api.broker.Topic
 import com.lightbend.lagom.scaladsl.api.transport.NotFound

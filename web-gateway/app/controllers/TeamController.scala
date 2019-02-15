@@ -2,7 +2,8 @@ package controllers
 
 import java.util.UUID
 
-import com.golemiso.mylagom.team.api.{ Team, TeamRequest, TeamService }
+import com.golemiso.mylagom.model.Team
+import com.golemiso.mylagom.team.api.{ TeamRequest, TeamService }
 import com.lightbend.lagom.scaladsl.api.transport.NotFound
 import domain.{ TeamID, Team => DomainTeam }
 import play.api.libs.json.{ Json, OFormat }
