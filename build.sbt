@@ -74,6 +74,7 @@ lazy val `competition-api` = (project in file("competition/api"))
       lagomScaladslApi
     )
   )
+  .dependsOn(`player-api`, `battle-api`)
 
 lazy val `competition-impl` = (project in file("competition/impl"))
   .enablePlugins(LagomScala)
