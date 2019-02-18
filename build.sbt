@@ -95,6 +95,25 @@ lazy val `competition-impl` = (project in file("competition/impl"))
   )
   .dependsOn(`competition-api`)
 
+lazy val `aggregation-api` = (project in file("aggregation/api"))
+  .settings(
+    libraryDependencies ++= Seq(
+      lagomScaladslApi
+    )
+  )
+  .dependsOn(`common`)
+
+lazy val `aggregation-impl` = (project in file("aggregation/impl"))
+  .enablePlugins(LagomScala)
+  .settings(
+    libraryDependencies ++= Seq(
+      lagomScaladslPersistenceCassandra,
+      macwire,
+      scalaTest
+    )
+  )
+  .dependsOn(`aggregation-api`, `player-api`, `competition-api`, `team-api`, `battle-api`)
+
 lazy val `web-gateway` = (project in file("web-gateway"))
   .enablePlugins(LagomPlayScala)
   .settings(
@@ -106,6 +125,6 @@ lazy val `web-gateway` = (project in file("web-gateway"))
     ),
     javaOptions in Test += "-Dconfig.file=test/resources/test.conf"
   )
-  .dependsOn(`player-api`, `competition-api`, `team-api`, `battle-api`)
+  .dependsOn(`aggregation-api`, `player-api`, `competition-api`, `team-api`, `battle-api`)
 
 lagomCassandraCleanOnStart in ThisBuild := true

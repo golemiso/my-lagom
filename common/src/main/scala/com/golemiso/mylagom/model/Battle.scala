@@ -4,7 +4,7 @@ import java.util.UUID
 
 import play.api.libs.json.{ Format, Json, Reads, Writes }
 
-case class Battle(id: Battle.Id, slug: Battle.Slug, name: Battle.Name, mode: Battle.Mode, teams: Seq[Team.Id], result: Option[Battle.Result]) {
+case class Battle(id: Battle.Id, slug: Battle.Slug, name: Battle.Name, mode: Battle.Mode, competitors: Battle.Competitors, result: Option[Battle.Result]) {
   def apply(result: Battle.Result): Battle = copy(result = Some(result))
 }
 object Battle {
@@ -39,6 +39,11 @@ object Battle {
 
     implicit val format: Format[Mode] =
       Format(Reads.StringReads.map(Mode.apply), Writes.StringWrites.contramap(_.value))
+  }
+
+  case class Competitors(left: Team.Id, right: Team.Id)
+  object Competitors {
+    implicit val format: Format[Competitors] = Json.format
   }
 
   case class Result(victory: Team.Id, defeat: Team.Id)

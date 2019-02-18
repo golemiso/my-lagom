@@ -1,5 +1,7 @@
 package com.golemiso.mylagom.battle.impl
 
+import java.util.UUID
+
 import akka.Done
 import com.golemiso.mylagom.model.Battle
 import com.lightbend.lagom.scaladsl.persistence.{ AggregateEvent, AggregateEventTag, PersistentEntity, PersistentEntityRegistry }
@@ -37,6 +39,8 @@ class BattleEntity(registry: PersistentEntityRegistry) extends PersistentEntity 
         case (BattleEvent.Created(battle), _) => Some(battle)
       }
   }
+
+  def id = Battle.Id(UUID.fromString(entityId))
 }
 
 sealed trait BattleCommand

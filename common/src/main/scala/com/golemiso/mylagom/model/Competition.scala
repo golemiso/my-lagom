@@ -13,14 +13,14 @@ case class Competition(
   participants: Seq[Player.Id],
   battleHistories: Seq[Battle.Id]) {
 
-  def add(playerId: Player.Id): this.type =
+  def addParticipant(playerId: Player.Id): Competition =
     copy(participants = participants :+ playerId)
-  def remove(playerId: Player.Id): this.type =
+  def removeParticipant(playerId: Player.Id): Competition =
     copy(participants = participants.filterNot(_ == playerId))
 
-  def add(battleId: Battle.Id): this.type =
+  def addBattle(battleId: Battle.Id): Competition =
     copy(battleHistories = battleHistories :+ battleId)
-  def remove(battleId: Battle.Id): this.type =
+  def removeBattle(battleId: Battle.Id): Competition =
     copy(battleHistories = battleHistories.filterNot(_ == battleId))
 }
 object Competition {
