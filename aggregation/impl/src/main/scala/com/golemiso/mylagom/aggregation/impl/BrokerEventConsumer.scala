@@ -8,17 +8,17 @@ import com.lightbend.lagom.scaladsl.api.broker.Message
 
 class BrokerEventConsumer(battleService: BattleService) {
 
-  private val battleEvents = battleService.events
-  battleEvents
-    .subscribe.withMetadata
-    .withGroupId("competition-service")
-    .atLeastOnce(Flow[Message[BattleEvent]].map {
-      case msg @ BattleEvent.Created(Battle(id, slug, name, mode, teams, result)) =>
-        msg.messageKeyAsString
-        Done
-      case msg @ BattleEvent.ResultUpdated(Battle(id, slug, name, mode, teams, result)) =>
-        Done
-      case _ =>
-        Done
-    })
+  //  private val battleEvents = battleService.events
+  //  battleEvents
+  //    .subscribe.withMetadata
+  //    .withGroupId("competition-service")
+  //    .atLeastOnce(Flow[Message[BattleEvent]].map {
+  //      case msg@BattleEvent.Created(Battle(id, slug, name, mode, teams, result)) =>
+  //        msg.messageKeyAsString
+  //        Done
+  //      case msg@BattleEvent.ResultUpdated(Battle(id, slug, name, mode, teams, result)) =>
+  //        Done
+  //      case _ =>
+  //        Done
+  //    })
 }

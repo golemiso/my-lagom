@@ -11,7 +11,7 @@ case class CompetitionDetails(
   participants: Seq[Player],
   battleHistories: Seq[Battle])
 case class PlayerDetails(id: Player.Id)
-case class BattleDetails(id: Battle.Id, slug: Battle.Slug, name: Battle.Name, mode: Battle.Mode, competitors: BattleDetails.Competitors, result: Option[Battle.Result])
+case class BattleDetails(id: Battle.Id, mode: Battle.Mode, competitors: BattleDetails.Competitors, result: Option[Battle.Result])
 object BattleDetails {
   case class Competitors(left: Seq[Player], right: Seq[Player])
   object Competitors {
@@ -19,3 +19,8 @@ object BattleDetails {
   }
 }
 case class TeamDetails(id: Team.Id)
+
+case class PlayerRanking(rank: Int, player: Player)
+object PlayerRanking {
+  implicit val format: Format[PlayerRanking] = Json.format
+}

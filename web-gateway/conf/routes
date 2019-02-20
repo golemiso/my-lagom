@@ -32,4 +32,4 @@ POST    /battles                    controllers.BattleController.post()
 DELETE  /battles/:id                controllers.BattleController.delete(id: com.golemiso.mylagom.model.Battle.Id)
 PATCH   /battles/:id/result         controllers.BattleController.patchResult(id: com.golemiso.mylagom.model.Battle.Id)
 
-GET     /rankings                   controllers.RankingController.get(rankBy: String)
+GET     /competitions/:id/rankings  controllers.RankingController.get(id: com.golemiso.mylagom.model.Competition.Id)

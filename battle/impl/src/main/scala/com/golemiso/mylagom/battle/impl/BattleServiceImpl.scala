@@ -62,13 +62,13 @@ class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
     refFor(id).ask(BattleCommand.UpdateResult(result)).map { _ => NotUsed }
   }
 
-  override def events: Topic[api.BattleEvent] = TopicProducer.singleStreamWithOffset { fromOffset =>
-    registry.eventStream(BattleEvent.Tag, fromOffset).mapConcat {
-      case EventStreamElement(_, BattleEvent.ResultUpdated(battle), offset) =>
-        immutable.Seq((api.BattleEvent.ResultUpdated(battle), offset))
-      case _ => Nil
-    }
-  }
+  //  override def events: Topic[api.BattleEvent] = TopicProducer.singleStreamWithOffset { fromOffset =>
+  //    registry.eventStream(BattleEvent.Tag, fromOffset).mapConcat {
+  //      case EventStreamElement(_, BattleEvent.ResultUpdated(battle), offset) =>
+  //        immutable.Seq((api.BattleEvent.ResultUpdated(battle), offset))
+  //      case _ => Nil
+  //    }
+  //  }
 
   private def refFor(id: Battle.Id) = registry.refFor[BattleEntity](id.id.toString)
 }

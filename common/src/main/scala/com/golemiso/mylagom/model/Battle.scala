@@ -4,7 +4,7 @@ import java.util.UUID
 
 import play.api.libs.json.{ Format, Json, Reads, Writes }
 
-case class Battle(id: Battle.Id, slug: Battle.Slug, name: Battle.Name, mode: Battle.Mode, competitors: Battle.Competitors, result: Option[Battle.Result]) {
+case class Battle(id: Battle.Id, competitionId: Competition.Id, mode: Battle.Mode, competitors: Battle.Competitors, result: Option[Battle.Result]) {
   def apply(result: Battle.Result): Battle = copy(result = Some(result))
 }
 object Battle {
@@ -15,18 +15,8 @@ object Battle {
     implicit val format: Format[Id] = Json.valueFormat
   }
 
-  case class Slug(slug: String) extends AnyVal
-  object Slug {
-    implicit val format: Format[Slug] = Json.valueFormat
-  }
-
-  case class Name(name: String) extends AnyVal
-  object Name {
-    implicit val format: Format[Name] = Json.valueFormat
-  }
-
   sealed abstract class Mode(val value: String)
-  object Mode extends {
+  object Mode {
     case object TurfWar extends Mode("turf_war")
     case object SplatZones extends Mode("splat_zones")
     case object TowerControl extends Mode("tower_control")
@@ -46,8 +36,16 @@ object Battle {
     implicit val format: Format[Competitors] = Json.format
   }
 
-  case class Result(victory: Team.Id, defeat: Team.Id)
+  sealed abstract class Result(val value: String)
   object Result {
-    implicit val format: Format[Result] = Json.format
+    case object VictoryLeft extends Result("victory_left")
+    case object VictoryRight extends Result("victory_right")
+    case object Unknown extends Result("unknown")
+    val all: Seq[Result] = VictoryLeft :: VictoryRight :: Nil
+    def apply(value: String): Result = all.find(_.value == value).getOrElse(Unknown)
+    def unapply(result: Result): Option[String] = Some(result.value)
+
+    implicit val format: Format[Result] =
+      Format(Reads.StringReads.map(Result.apply), Writes.StringWrites.contramap(_.value))
   }
 }

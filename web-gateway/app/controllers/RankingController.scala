@@ -1,20 +1,17 @@
 package controllers
 
+import com.golemiso.mylagom.aggregation.api.AggregationService
+import com.golemiso.mylagom.model.Competition
 import play.api.libs.json.{ Json, OFormat }
 import play.api.mvc._
-import service.PlayerRecordService
 
 import scala.concurrent.ExecutionContext
 
-class RankingController(mcc: MessagesControllerComponents, playerRecordService: PlayerRecordService)(implicit ec: ExecutionContext) extends MessagesAbstractController(mcc) {
+class RankingController(mcc: MessagesControllerComponents, aggregationService: AggregationService)(implicit ec: ExecutionContext) extends MessagesAbstractController(mcc) {
 
-  def get(rankBy: String): Action[AnyContent] = Action.async { implicit request: MessagesRequest[AnyContent] =>
-    playerRecordService.getAll.map { playerRecords =>
-      val resource = playerRecords.map { playerRecord =>
-        val rank = playerRecords.count(_.record.victory > playerRecord.record.victory) + 1
-        RankingResource(rank, playerRecord.player)
-      }.sortBy(_.rank)
-      Ok(Json.toJson(resource))
+  def get(competitionId: Competition.Id): Action[AnyContent] = Action.async { _ =>
+    aggregationService.rankingsBy(competitionId).invoke.map { playerRanking =>
+      Ok(Json.toJson(playerRanking))
     }
   }
 }

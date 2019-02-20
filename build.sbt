@@ -107,7 +107,7 @@ lazy val `aggregation-impl` = (project in file("aggregation/impl"))
   .enablePlugins(LagomScala)
   .settings(
     libraryDependencies ++= Seq(
-      lagomScaladslPersistenceCassandra,
+      lagomScaladslServer,
       macwire,
       scalaTest
     )

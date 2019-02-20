@@ -14,7 +14,7 @@ trait BattleService extends Service {
   def readAll: ServiceCall[NotUsed, Seq[Battle]]
   def updateResult(id: Battle.Id): ServiceCall[Battle.Result, NotUsed]
 
-  def events: Topic[BattleEvent]
+  //  def events: Topic[BattleEvent]
 
   def descriptor: Descriptor = {
     import Service._
@@ -24,7 +24,7 @@ trait BattleService extends Service {
       restCall(Method.DELETE, "/api/battles/:id", delete _),
 
       restCall(Method.GET, "/api/battles", readAll),
-      restCall(Method.PATCH, "/api/battles/:id/result", updateResult _)).withTopics(
-        topic("BattleEvent", this.events))
+      restCall(Method.PATCH, "/api/battles/:id/result", updateResult _))
+    //      .withTopics(topic("BattleEvent", this.events))
   }
 }
