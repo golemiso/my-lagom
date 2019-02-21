@@ -15,6 +15,12 @@ class CompetitionController(mcc: MessagesControllerComponents, service: Competit
     }
   }
 
+  def getAll: Action[AnyContent] = Action.async { _ =>
+    service.readAll.invoke.map { competitions =>
+      Ok(Json.toJson(competitions))
+    }
+  }
+
   def post(): Action[CompetitionRequest] = Action.async(parse.json[CompetitionRequest]) { request =>
     service.create().invoke(request.body).map { id =>
       Ok(Json.toJson(id))

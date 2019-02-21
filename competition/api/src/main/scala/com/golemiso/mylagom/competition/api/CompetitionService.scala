@@ -10,10 +10,14 @@ trait CompetitionService extends Service {
   def create(): ServiceCall[CompetitionRequest, Competition.Id]
   def read(id: Competition.Id): ServiceCall[NotUsed, Competition]
 
+  def readAll: ServiceCall[NotUsed, Seq[Competition]]
+
   def descriptor: Descriptor = {
     import Service._
     named("competitions").withCalls(
       restCall(Method.POST, "/api/competitions", create _),
-      restCall(Method.GET, "/api/competitions/:id", read _))
+      restCall(Method.GET, "/api/competitions/:id", read _),
+
+      restCall(Method.GET, "/api/competitions", readAll))
   }
 }

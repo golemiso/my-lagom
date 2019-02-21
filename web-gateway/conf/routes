@@ -16,6 +16,7 @@ POST    /players                    controllers.PlayerController.post()
 PUT     /players/:id                controllers.PlayerController.put(id: com.golemiso.mylagom.model.Player.Id)
 DELETE  /players/:id                controllers.PlayerController.delete(id: com.golemiso.mylagom.model.Player.Id)
 
+GET     /competitions               controllers.CompetitionController.getAll
 GET     /competitions/:id           controllers.CompetitionController.get(id: com.golemiso.mylagom.model.Competition.Id)
 POST    /competitions               controllers.CompetitionController.post()
 
