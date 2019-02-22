@@ -13,8 +13,9 @@ case class Competition(
   participants: Seq[Player.Id],
   battleHistories: Seq[Battle.Id]) {
 
-  def addParticipant(playerId: Player.Id): Competition =
-    copy(participants = participants :+ playerId)
+  def addParticipant(playerId: Player.Id): Competition = {
+    copy(participants = participants.filterNot(_ == playerId) :+ playerId)
+  }
   def removeParticipant(playerId: Player.Id): Competition =
     copy(participants = participants.filterNot(_ == playerId))
 

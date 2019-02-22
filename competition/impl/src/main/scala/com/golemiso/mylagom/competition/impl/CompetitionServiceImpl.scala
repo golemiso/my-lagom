@@ -2,6 +2,7 @@ package com.golemiso.mylagom.competition.impl
 
 import java.util.UUID
 
+import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.persistence.cassandra.query.scaladsl.CassandraReadJournal
 import akka.persistence.query.PersistenceQuery
@@ -47,6 +48,10 @@ class CompetitionServiceImpl(registry: PersistentEntityRegistry, system: ActorSy
         case Some(player) => player
       }
       .runWith(Sink.seq)
+  }
+
+  override def addParticipant(id: Competition.Id) = ServiceCall { participant =>
+    refFor(id).ask(CompetitionCommand.AddParticipant(participant)).map { _ => NotUsed }
   }
 
   private def refFor(id: Competition.Id) = registry.refFor[CompetitionEntity](id.id.toString)
