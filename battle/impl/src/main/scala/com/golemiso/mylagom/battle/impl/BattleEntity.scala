@@ -7,6 +7,7 @@ import com.golemiso.mylagom.model.Battle
 import com.lightbend.lagom.scaladsl.persistence.{ AggregateEvent, AggregateEventTag, PersistentEntity, PersistentEntityRegistry }
 import com.lightbend.lagom.scaladsl.playjson.{ JsonSerializer, JsonSerializerRegistry }
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity.ReplyType
+import play.api.libs.json.{ Format, Json }
 
 class BattleEntity(registry: PersistentEntityRegistry) extends PersistentEntity {
   override type Command = BattleCommand
@@ -27,6 +28,7 @@ class BattleEntity(registry: PersistentEntityRegistry) extends PersistentEntity 
         case (BattleCommand.Delete, ctx, _) =>
           ctx.thenPersist(BattleEvent.Deleted)(_ => ctx.reply(Done))
       }.onEvent {
+        case (BattleEvent.ResultUpdated(battle), _) => Some(battle)
         case (BattleEvent.Deleted, _) => None
       }
     case None =>
@@ -59,12 +61,24 @@ object BattleEvent {
   val Tag: AggregateEventTag[BattleEvent] = AggregateEventTag[BattleEvent]
 
   case class Created(battle: Battle) extends BattleEvent
-  case object Deleted extends BattleEvent
+  object Created {
+    implicit val format: Format[Created] = Json.format
+  }
+
+  case object Deleted extends BattleEvent {
+    implicit val format: Format[Deleted.type] = JsonSerializer.emptySingletonFormat(Deleted)
+  }
 
   case class ResultUpdated(battle: Battle) extends BattleEvent
+  object ResultUpdated {
+    implicit val format: Format[ResultUpdated] = Json.format
+  }
 }
 
 object BattleSerializerRegistry extends JsonSerializerRegistry {
   override def serializers = List(
-    JsonSerializer[Battle])
+    JsonSerializer[Battle],
+    JsonSerializer[BattleEvent.Created],
+    JsonSerializer[BattleEvent.Deleted.type],
+    JsonSerializer[BattleEvent.ResultUpdated])
 }

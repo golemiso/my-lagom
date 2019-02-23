@@ -5,7 +5,7 @@ import com.golemiso.mylagom.model.{ Competition, Player }
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity.ReplyType
 import com.lightbend.lagom.scaladsl.playjson.{ JsonSerializer, JsonSerializerRegistry }
-import play.api.libs.json.Format
+import play.api.libs.json.{ Format, Json }
 
 class CompetitionEntity extends PersistentEntity {
   override type Command = CompetitionCommand
@@ -52,10 +52,19 @@ object CompetitionCommand {
 sealed trait CompetitionEvent
 object CompetitionEvent {
   case class Created(competition: Competition) extends CompetitionEvent
+  object Created {
+    implicit val format: Format[Created] = Json.format
+  }
+
   case class ParticipantAdded(competition: Competition) extends CompetitionEvent
+  object ParticipantAdded {
+    implicit val format: Format[ParticipantAdded] = Json.format
+  }
 }
 
 object CompetitionSerializerRegistry extends JsonSerializerRegistry {
   override def serializers = List(
-    JsonSerializer[Competition])
+    JsonSerializer[Competition],
+    JsonSerializer[CompetitionEvent.Created],
+    JsonSerializer[CompetitionEvent.ParticipantAdded])
 }

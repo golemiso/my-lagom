@@ -35,3 +35,4 @@ DELETE  /battles/:id                controllers.BattleController.delete(id: com.
 PATCH   /battles/:id/result         controllers.BattleController.patchResult(id: com.golemiso.mylagom.model.Battle.Id)
 
 GET     /competitions/:id/rankings  controllers.RankingController.get(id: com.golemiso.mylagom.model.Competition.Id)
+GET     /competitions/:id/battle-histories  controllers.CompetitionController.getBattleHistories(id: com.golemiso.mylagom.model.Competition.Id)

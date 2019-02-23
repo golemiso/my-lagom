@@ -5,6 +5,7 @@ import com.golemiso.mylagom.model.Player
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity
 import com.lightbend.lagom.scaladsl.playjson.{ JsonSerializer, JsonSerializerRegistry }
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity.ReplyType
+import play.api.libs.json.{ Format, Json, __ }
 
 class PlayerEntity extends PersistentEntity {
   override type Command = PlayerCommand
@@ -55,11 +56,24 @@ object PlayerCommand {
 sealed trait PlayerEvent
 object PlayerEvent {
   case class Created(player: Player) extends PlayerEvent
+  object Created {
+    implicit val format: Format[Created] = Json.format
+  }
+
   case class Updated(player: Player) extends PlayerEvent
-  case object Deleted extends PlayerEvent
+  object Updated {
+    implicit val format: Format[Updated] = Json.format
+  }
+
+  case object Deleted extends PlayerEvent {
+    implicit val format: Format[Deleted.type] = JsonSerializer.emptySingletonFormat(Deleted)
+  }
 }
 
 object PlayerSerializerRegistry extends JsonSerializerRegistry {
   override def serializers = List(
-    JsonSerializer[Player])
+    JsonSerializer[Player],
+    JsonSerializer[PlayerEvent.Created],
+    JsonSerializer[PlayerEvent.Updated],
+    JsonSerializer[PlayerEvent.Deleted.type])
 }

@@ -127,4 +127,4 @@ lazy val `web-gateway` = (project in file("web-gateway"))
   )
   .dependsOn(`aggregation-api`, `player-api`, `competition-api`, `team-api`, `battle-api`)
 
-//lagomCassandraCleanOnStart in ThisBuild := true
+lagomCassandraCleanOnStart in ThisBuild := true

@@ -1,5 +1,6 @@
 package controllers
 
+import com.golemiso.mylagom.aggregation.api.AggregationService
 import com.golemiso.mylagom.competition.api.{ CompetitionRequest, CompetitionService }
 import com.golemiso.mylagom.model.{ Competition, Player }
 import play.api.libs.json.Json
@@ -7,7 +8,10 @@ import play.api.mvc.{ Action, AnyContent, MessagesAbstractController, MessagesCo
 
 import scala.concurrent.ExecutionContext
 
-class CompetitionController(mcc: MessagesControllerComponents, service: CompetitionService)(implicit ec: ExecutionContext) extends MessagesAbstractController(mcc) {
+class CompetitionController(
+  mcc: MessagesControllerComponents,
+  service: CompetitionService,
+  aggregationService: AggregationService)(implicit ec: ExecutionContext) extends MessagesAbstractController(mcc) {
 
   def get(id: Competition.Id): Action[AnyContent] = Action.async { _ =>
     service.read(id).invoke.map { competition =>
@@ -30,6 +34,12 @@ class CompetitionController(mcc: MessagesControllerComponents, service: Competit
   def postParticipant(id: Competition.Id): Action[Player.Id] = Action.async(parse.json[Player.Id]) { request =>
     service.addParticipant(id).invoke(request.body).map { _ =>
       Created
+    }
+  }
+
+  def getBattleHistories(id: Competition.Id): Action[AnyContent] = Action.async { _ =>
+    aggregationService.battleHistoriesBy(id).invoke.map { battles =>
+      Ok(Json.toJson(battles))
     }
   }
 }

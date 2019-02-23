@@ -2,7 +2,7 @@ package com.golemiso.mylagom.aggregation.impl
 
 import akka.NotUsed
 import akka.stream.Materializer
-import com.golemiso.mylagom.aggregation.api.{ AggregationService, PlayerRanking }
+import com.golemiso.mylagom.aggregation.api.{ AggregationService, BattleDetails, PlayerRanking }
 import com.golemiso.mylagom.battle.api.BattleService
 import com.golemiso.mylagom.competition.api.CompetitionService
 import com.golemiso.mylagom.model.{ Battle, Competition, Player, Team }
@@ -17,7 +17,8 @@ class AggregationServiceImpl(
   teamService: TeamService,
   battleService: BattleService,
   competitionService: CompetitionService)(implicit ec: ExecutionContext, mat: Materializer) extends AggregationService {
-  override def rankingsBy(id: Competition.Id): ServiceCall[NotUsed, Seq[PlayerRanking]] = ServiceCall { _ =>
+
+  override def rankingsBy(id: Competition.Id) = ServiceCall { _ =>
 
     case class PlayerRecord(player: Player, record: PlayerRecord.Record) {
       def winningPercentage: Int = {
@@ -34,9 +35,9 @@ class AggregationServiceImpl(
 
     for {
       competition <- competitionService.read(id).invoke
-      players <- playerService.readAll.invoke
-      teams <- teamService.readAll.invoke
       battles <- battleService.readAll.invoke
+      teams <- teamService.readAll.invoke
+      players <- playerService.readAll.invoke
     } yield {
       val participants = players.filter(p => competition.participants.contains(p.id))
       val playerRecords = {
@@ -68,7 +69,36 @@ class AggregationServiceImpl(
     }
   }
 
-  override def competitionDetails(id: Competition.Id): ServiceCall[NotUsed, Competition] = ???
+  override def battleHistoriesBy(id: Competition.Id) = ServiceCall { _ =>
+    for {
+      competition <- competitionService.read(id).invoke
+      battles <- battleService.readAll.invoke
+      teams <- teamService.readAll.invoke
+      players <- playerService.readAll.invoke
+    } yield {
+      battles.filter(_.competition == id).map { b =>
+        BattleDetails(
+          b.id,
+          competition,
+          b.mode,
+          BattleDetails.Competitors(
+            teams.find(_.id == b.competitors.left).map(t =>
+              BattleDetails.TeamDetails(
+                t.id,
+                t.slug,
+                t.name,
+                players.filter(p => t.players.contains(p.id)))).get,
+
+            teams.find(_.id == b.competitors.left).map(t =>
+              BattleDetails.TeamDetails(
+                t.id,
+                t.slug,
+                t.name,
+                players.filter(p => t.players.contains(p.id)))).get),
+          b.result)
+      }
+    }
+  }
 
   override def battleDetails(id: Battle.Id): ServiceCall[NotUsed, Competition] = ???
 
