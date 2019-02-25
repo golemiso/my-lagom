@@ -4,7 +4,12 @@ import java.util.UUID
 
 import akka.Done
 import com.golemiso.mylagom.model.Battle
-import com.lightbend.lagom.scaladsl.persistence.{ AggregateEvent, AggregateEventTag, PersistentEntity, PersistentEntityRegistry }
+import com.lightbend.lagom.scaladsl.persistence.{
+  AggregateEvent,
+  AggregateEventTag,
+  PersistentEntity,
+  PersistentEntityRegistry
+}
 import com.lightbend.lagom.scaladsl.playjson.{ JsonSerializer, JsonSerializerRegistry }
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity.ReplyType
 import play.api.libs.json.{ Format, Json }
@@ -17,29 +22,31 @@ class BattleEntity(registry: PersistentEntityRegistry) extends PersistentEntity 
 
   override def behavior: Behavior = {
     case Some(_) =>
-      Actions().onReadOnlyCommand[BattleCommand.Read.type, Option[Battle]] {
-        case (BattleCommand.Read, ctx, state) => ctx.reply(state)
-      }.onReadOnlyCommand[BattleCommand.Create, Done] {
-        case (BattleCommand.Create(_), ctx, _) => ctx.invalidCommand("Battle already exists")
-      }.onCommand[BattleCommand.UpdateResult, Done] {
-        case (BattleCommand.UpdateResult(result), ctx, Some(battle)) =>
-          ctx.thenPersist(BattleEvent.ResultUpdated(battle(result)))(_ => ctx.reply(Done))
-      }.onCommand[BattleCommand.Delete.type, Done] {
-        case (BattleCommand.Delete, ctx, _) =>
-          ctx.thenPersist(BattleEvent.Deleted)(_ => ctx.reply(Done))
-      }.onEvent {
-        case (BattleEvent.ResultUpdated(battle), _) => Some(battle)
-        case (BattleEvent.Deleted, _) => None
-      }
+      Actions()
+        .onReadOnlyCommand[BattleCommand.Read.type, Option[Battle]] {
+          case (BattleCommand.Read, ctx, state) => ctx.reply(state)
+        }.onReadOnlyCommand[BattleCommand.Create, Done] {
+          case (BattleCommand.Create(_), ctx, _) => ctx.invalidCommand("Battle already exists")
+        }.onCommand[BattleCommand.UpdateResult, Done] {
+          case (BattleCommand.UpdateResult(result), ctx, Some(battle)) =>
+            ctx.thenPersist(BattleEvent.ResultUpdated(battle(result)))(_ => ctx.reply(Done))
+        }.onCommand[BattleCommand.Delete.type, Done] {
+          case (BattleCommand.Delete, ctx, _) =>
+            ctx.thenPersist(BattleEvent.Deleted)(_ => ctx.reply(Done))
+        }.onEvent {
+          case (BattleEvent.ResultUpdated(battle), _) => Some(battle)
+          case (BattleEvent.Deleted, _)               => None
+        }
     case None =>
-      Actions().onReadOnlyCommand[BattleCommand.Read.type, Option[Battle]] {
-        case (BattleCommand.Read, ctx, state) => ctx.reply(state)
-      }.onCommand[BattleCommand.Create, Done] {
-        case (BattleCommand.Create(battle), ctx, _) =>
-          ctx.thenPersist(BattleEvent.Created(battle))(_ => ctx.reply(Done))
-      }.onEvent {
-        case (BattleEvent.Created(battle), _) => Some(battle)
-      }
+      Actions()
+        .onReadOnlyCommand[BattleCommand.Read.type, Option[Battle]] {
+          case (BattleCommand.Read, ctx, state) => ctx.reply(state)
+        }.onCommand[BattleCommand.Create, Done] {
+          case (BattleCommand.Create(battle), ctx, _) =>
+            ctx.thenPersist(BattleEvent.Created(battle))(_ => ctx.reply(Done))
+        }.onEvent {
+          case (BattleEvent.Created(battle), _) => Some(battle)
+        }
   }
 
   def id = Battle.Id(UUID.fromString(entityId))
@@ -76,9 +83,10 @@ object BattleEvent {
 }
 
 object BattleSerializerRegistry extends JsonSerializerRegistry {
-  override def serializers = List(
-    JsonSerializer[Battle],
-    JsonSerializer[BattleEvent.Created],
-    JsonSerializer[BattleEvent.Deleted.type],
-    JsonSerializer[BattleEvent.ResultUpdated])
+  override def serializers =
+    List(
+      JsonSerializer[Battle],
+      JsonSerializer[BattleEvent.Created],
+      JsonSerializer[BattleEvent.Deleted.type],
+      JsonSerializer[BattleEvent.ResultUpdated])
 }

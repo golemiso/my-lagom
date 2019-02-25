@@ -8,7 +8,9 @@ import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
 
-class GroupingController(mcc: MessagesControllerComponents, repository: GroupingRepository)(implicit ec: ExecutionContext) extends MessagesAbstractController(mcc) {
+class GroupingController(mcc: MessagesControllerComponents, repository: GroupingRepository)(
+  implicit ec: ExecutionContext)
+  extends MessagesAbstractController(mcc) {
 
   def get(id: UUID): Action[AnyContent] = Action.async { implicit request: MessagesRequest[AnyContent] =>
     repository.resolveBy(GroupingID(id)).map { grouping =>
@@ -28,18 +30,20 @@ class GroupingController(mcc: MessagesControllerComponents, repository: Grouping
     }
   }
 
-  def post(): Action[GroupingResource] = Action.async(parse.json[GroupingResource]) { implicit request: MessagesRequest[GroupingResource] =>
-    val groupingResource = request.body
-    repository.store(groupingResource).map { grouping =>
-      Created(Json.toJson[GroupingResource](grouping))
-    }
+  def post(): Action[GroupingResource] = Action.async(parse.json[GroupingResource]) {
+    implicit request: MessagesRequest[GroupingResource] =>
+      val groupingResource = request.body
+      repository.store(groupingResource).map { grouping =>
+        Created(Json.toJson[GroupingResource](grouping))
+      }
   }
 
-  def put(id: UUID): Action[GroupingResource] = Action.async(parse.json[GroupingResource]) { implicit request: MessagesRequest[GroupingResource] =>
-    val groupingResource = request.body
-    repository.store(groupingResource).map { grouping =>
-      Accepted(Json.toJson[GroupingResource](grouping))
-    }
+  def put(id: UUID): Action[GroupingResource] = Action.async(parse.json[GroupingResource]) {
+    implicit request: MessagesRequest[GroupingResource] =>
+      val groupingResource = request.body
+      repository.store(groupingResource).map { grouping =>
+        Accepted(Json.toJson[GroupingResource](grouping))
+      }
   }
 }
 
@@ -50,5 +54,6 @@ object GroupingResource {
     val id = groupingResource.id.map(GroupingID.apply).getOrElse(GroupingID.generate)
     Grouping(id, groupingResource.teams)
   }
-  implicit def fromEntity(grouping: Grouping): GroupingResource = GroupingResource(Some(grouping.id.value), grouping.teams)
+  implicit def fromEntity(grouping: Grouping): GroupingResource =
+    GroupingResource(Some(grouping.id.value), grouping.teams)
 }

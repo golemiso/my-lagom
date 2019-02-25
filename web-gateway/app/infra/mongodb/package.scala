@@ -33,13 +33,17 @@ package object mongodb {
       (array(offset + 7).toLong & 0xff)
   }
 
-  implicit def implyConvertedTraversable[A, B, C[X] <: Traversable[X]](as: C[A])(implicit conversion: A => B, cbf: CanBuildFrom[C[A], B, C[B]]): C[B] = {
+  implicit def implyConvertedTraversable[A, B, C[X] <: Traversable[X]](
+    as: C[A])(implicit conversion: A => B, cbf: CanBuildFrom[C[A], B, C[B]]): C[B] = {
     val builder = cbf(as)
     builder.sizeHint(as)
     builder ++= as.map(conversion)
     builder.result()
   }
-  implicit def implyConvertedFutureTraversable[A, B, C[X] <: Traversable[X]](futureAs: Future[C[A]])(implicit conversion: A => B, cbf: CanBuildFrom[C[A], B, C[B]], executor: ExecutionContext): Future[C[B]] = {
+  implicit def implyConvertedFutureTraversable[A, B, C[X] <: Traversable[X]](futureAs: Future[C[A]])(
+    implicit conversion: A => B,
+    cbf: CanBuildFrom[C[A], B, C[B]],
+    executor: ExecutionContext): Future[C[B]] = {
     futureAs.map { as =>
       val builder = cbf(as)
       builder.sizeHint(as)
@@ -47,5 +51,8 @@ package object mongodb {
       builder.result()
     }
   }
-  implicit def implyConvertedFuture[A, B](as: Future[A])(implicit conversion: A => B, executor: ExecutionContext): Future[B] = as.map { a => a: B }
+  implicit def implyConvertedFuture[A, B](
+    as: Future[A])(implicit conversion: A => B, executor: ExecutionContext): Future[B] = as.map { a =>
+    a: B
+  }
 }

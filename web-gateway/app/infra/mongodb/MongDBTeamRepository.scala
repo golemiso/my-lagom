@@ -13,10 +13,12 @@ class MongoDBTeamRepository(db: Future[DefaultDB])(implicit ec: ExecutionContext
 
   def teamsCollection: Future[BSONCollection] = db.map(_.collection("teams"))
 
-  override def resolve: Future[Seq[Team]] = for {
-    connection <- teamsCollection
-    teams <- connection.find(BSONDocument()).cursor[TeamDocument]().collect[Seq](1000, Cursor.FailOnError[Seq[TeamDocument]]())
-  } yield teams
+  override def resolve: Future[Seq[Team]] =
+    for {
+      connection <- teamsCollection
+      teams <- connection
+        .find(BSONDocument()).cursor[TeamDocument]().collect[Seq](1000, Cursor.FailOnError[Seq[TeamDocument]]())
+    } yield teams
 
   override def resolveBy(id: TeamID): Future[Team] = {
     val query = BSONDocument("_id" -> id.value)

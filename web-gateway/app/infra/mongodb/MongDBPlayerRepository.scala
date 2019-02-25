@@ -18,7 +18,8 @@ class MongoDBPlayerRepository(db: Future[DefaultDB])(implicit ec: ExecutionConte
   override def resolve: Future[Seq[Player]] = {
     for {
       collection <- playersCollection
-      player <- collection.find(BSONDocument()).cursor[PlayerDocument]().collect[Seq](1000, Cursor.FailOnError[Seq[PlayerDocument]]())
+      player <- collection
+        .find(BSONDocument()).cursor[PlayerDocument]().collect[Seq](1000, Cursor.FailOnError[Seq[PlayerDocument]]())
     } yield player
   }
 
@@ -48,16 +49,21 @@ class MongoDBPlayerRepository(db: Future[DefaultDB])(implicit ec: ExecutionConte
       collection <- playersCollection
       player <- {
         import collection.BatchCommands.AggregationFramework._
-        collection.aggregate(
-          Lookup(from = "battles", localField = "_id", foreignField = "victory.players._id", as = "victory"),
-          List(
-            Lookup(from = "battles", localField = "_id", foreignField = "defeat.players._id", as = "defeat"),
-            Project(BSONDocument(
-              "_id" -> 0,
-              "player._id" -> "$_id",
-              "player.name" -> "$name",
-              "record.victory" -> BSONDocument("$size" -> "$victory"),
-              "record.defeat" -> BSONDocument("$size" -> "$defeat"))))).map(_.head[PlayerRecordDocument].toSeq)
+        collection
+          .aggregate(
+            Lookup(from = "battles", localField = "_id", foreignField = "victory.players._id", as = "victory"),
+            List(
+              Lookup(from = "battles", localField = "_id", foreignField = "defeat.players._id", as = "defeat"),
+              Project(
+                BSONDocument(
+                  "_id" -> 0,
+                  "player._id" -> "$_id",
+                  "player.name" -> "$name",
+                  "record.victory" -> BSONDocument("$size" -> "$victory"),
+                  "record.defeat" -> BSONDocument("$size" -> "$defeat")
+                ))
+            )
+          ).map(_.head[PlayerRecordDocument].toSeq)
       }
     } yield player
   }
@@ -67,7 +73,12 @@ class MongoDBPlayerRepository(db: Future[DefaultDB])(implicit ec: ExecutionConte
       collection <- playersCollection
       playerBattles <- {
         import collection.BatchCommands.AggregationFramework._
-        collection.aggregatorContext[PlayerBattlesDocument](Lookup(from = "battles", localField = "_id", foreignField = "teams.players._id", as = "battles")).prepared.cursor.collect[Seq]()
+        collection
+          .aggregatorContext[PlayerBattlesDocument](Lookup(
+            from = "battles",
+            localField = "_id",
+            foreignField = "teams.players._id",
+            as = "battles")).prepared.cursor.collect[Seq]()
       }
     } yield playerBattles
   }
@@ -89,11 +100,13 @@ object RecordDocument {
 case class PlayerRecordDocument(player: PlayerDocument, record: RecordDocument)
 object PlayerRecordDocument {
   implicit val reader: BSONDocumentReader[PlayerRecordDocument] = Macros.reader[PlayerRecordDocument]
-  implicit def toEntity(playerRecord: PlayerRecordDocument): PlayerRecord = PlayerRecord(playerRecord.player, playerRecord.record)
+  implicit def toEntity(playerRecord: PlayerRecordDocument): PlayerRecord =
+    PlayerRecord(playerRecord.player, playerRecord.record)
 }
 
 case class PlayerBattlesDocument(_id: UUID, name: String, battles: Seq[BattleDocument])
 object PlayerBattlesDocument {
   implicit val reader: BSONDocumentReader[PlayerBattlesDocument] = Macros.reader[PlayerBattlesDocument]
-  implicit def toEntity(playerBattles: PlayerBattlesDocument): PlayerBattles = PlayerBattles(Player(PlayerID(playerBattles._id), playerBattles.name), playerBattles.battles)
+  implicit def toEntity(playerBattles: PlayerBattlesDocument): PlayerBattles =
+    PlayerBattles(Player(PlayerID(playerBattles._id), playerBattles.name), playerBattles.battles)
 }

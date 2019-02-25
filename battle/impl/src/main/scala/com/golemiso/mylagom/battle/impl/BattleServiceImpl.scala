@@ -20,9 +20,13 @@ import com.lightbend.lagom.scaladsl.persistence.{ EventStreamElement, Persistent
 import scala.collection.immutable
 import scala.concurrent.ExecutionContext
 
-class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)(implicit ec: ExecutionContext, mat: Materializer) extends BattleService {
+class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)(
+  implicit ec: ExecutionContext,
+  mat: Materializer)
+  extends BattleService {
 
-  private val currentIdsQuery = PersistenceQuery(system).readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
+  private val currentIdsQuery =
+    PersistenceQuery(system).readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
 
   override def create() = ServiceCall { request =>
     val id = Battle.Id(UUID.randomUUID())
@@ -41,17 +45,19 @@ class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
   }
 
   override def delete(id: Battle.Id) = ServiceCall { _ =>
-    refFor(id).ask(BattleCommand.Delete).map { _ => NotUsed }
+    refFor(id).ask(BattleCommand.Delete).map { _ =>
+      NotUsed
+    }
   }
 
   override def readAll = ServiceCall { _ =>
     // Note this should never make production....
-    currentIdsQuery.currentPersistenceIds()
+    currentIdsQuery
+      .currentPersistenceIds()
       .filter(_.startsWith("BattleEntity|"))
       .mapAsync(4) { id =>
         val entityId = id.split("\\|", 2).last
-        registry.refFor[BattleEntity](entityId)
-          .ask(BattleCommand.Read)
+        registry.refFor[BattleEntity](entityId).ask(BattleCommand.Read)
       }.collect {
         case Some(battle) => battle
       }
@@ -59,7 +65,9 @@ class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
   }
 
   override def updateResult(id: Battle.Id) = ServiceCall { result =>
-    refFor(id).ask(BattleCommand.UpdateResult(result)).map { _ => NotUsed }
+    refFor(id).ask(BattleCommand.UpdateResult(result)).map { _ =>
+      NotUsed
+    }
   }
 
   //  override def events: Topic[api.BattleEvent] = TopicProducer.singleStreamWithOffset { fromOffset =>

@@ -16,10 +16,10 @@ class AggregationServiceImpl(
   playerService: PlayerService,
   teamService: TeamService,
   battleService: BattleService,
-  competitionService: CompetitionService)(implicit ec: ExecutionContext, mat: Materializer) extends AggregationService {
+  competitionService: CompetitionService)(implicit ec: ExecutionContext, mat: Materializer)
+  extends AggregationService {
 
   override def rankingsBy(id: Competition.Id) = ServiceCall { _ =>
-
     case class PlayerRecord(player: Player, record: PlayerRecord.Record) {
       def winningPercentage: Int = {
         if (record.victory > 0) {
@@ -43,8 +43,10 @@ class AggregationServiceImpl(
       val playerRecords = {
         battles.flatMap {
           case Battle(_, competitionId, _, competitors, Some(result)) if competitionId == id =>
-            val leftPlayers = teams.filter(_.id == competitors.left).flatMap(t => players.filter(p => t.players.contains(p.id)))
-            val rightPlayers = teams.filter(_.id == competitors.left).flatMap(t => players.filter(p => t.players.contains(p.id)))
+            val leftPlayers =
+              teams.filter(_.id == competitors.left).flatMap(t => players.filter(p => t.players.contains(p.id)))
+            val rightPlayers =
+              teams.filter(_.id == competitors.left).flatMap(t => players.filter(p => t.players.contains(p.id)))
 
             result match {
               case Battle.Result.VictoryLeft =>
@@ -56,10 +58,12 @@ class AggregationServiceImpl(
           case _ => Nil
         } ++ participants.map(PlayerRecord.apply(_, PlayerRecord.Record(0, 0)))
       }.groupBy(_.player).toSeq.map {
-        case (p, pr) => PlayerRecord(
-          player = p,
-          record = pr.map(_.record).foldLeft(PlayerRecord.Record(0, 0))((a, b) =>
-            PlayerRecord.Record(victory = a.victory + b.victory, defeat = a.defeat + b.defeat)))
+        case (p, pr) =>
+          PlayerRecord(
+            player = p,
+            record = pr
+              .map(_.record).foldLeft(PlayerRecord.Record(0, 0))((a, b) =>
+                PlayerRecord.Record(victory = a.victory + b.victory, defeat = a.defeat + b.defeat)))
       }
 
       playerRecords.map { playerRecord =>
@@ -82,20 +86,15 @@ class AggregationServiceImpl(
           competition,
           b.mode,
           BattleDetails.Competitors(
-            teams.find(_.id == b.competitors.left).map(t =>
-              BattleDetails.TeamDetails(
-                t.id,
-                t.slug,
-                t.name,
-                players.filter(p => t.players.contains(p.id)))).get,
-
-            teams.find(_.id == b.competitors.left).map(t =>
-              BattleDetails.TeamDetails(
-                t.id,
-                t.slug,
-                t.name,
-                players.filter(p => t.players.contains(p.id)))).get),
-          b.result)
+            teams
+              .find(_.id == b.competitors.left).map(t =>
+                BattleDetails.TeamDetails(t.id, t.slug, t.name, players.filter(p => t.players.contains(p.id)))).get,
+            teams
+              .find(_.id == b.competitors.left).map(t =>
+                BattleDetails.TeamDetails(t.id, t.slug, t.name, players.filter(p => t.players.contains(p.id)))).get
+          ),
+          b.result
+        )
       }
     }
   }

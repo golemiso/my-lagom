@@ -16,9 +16,13 @@ import com.lightbend.lagom.scaladsl.persistence.PersistentEntityRegistry
 
 import scala.concurrent.ExecutionContext
 
-class CompetitionServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)(implicit ec: ExecutionContext, mat: Materializer) extends CompetitionService {
+class CompetitionServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)(
+  implicit ec: ExecutionContext,
+  mat: Materializer)
+  extends CompetitionService {
 
-  private val currentIdsQuery = PersistenceQuery(system).readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
+  private val currentIdsQuery =
+    PersistenceQuery(system).readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
 
   override def create() = ServiceCall { competition =>
     val id = Competition.Id(UUID.randomUUID())
@@ -38,12 +42,12 @@ class CompetitionServiceImpl(registry: PersistentEntityRegistry, system: ActorSy
 
   override def readAll = ServiceCall { _ =>
     // Note this should never make production....
-    currentIdsQuery.currentPersistenceIds()
+    currentIdsQuery
+      .currentPersistenceIds()
       .filter(_.startsWith("CompetitionEntity|"))
       .mapAsync(4) { id =>
         val entityId = id.split("\\|", 2).last
-        registry.refFor[CompetitionEntity](entityId)
-          .ask(CompetitionCommand.Read)
+        registry.refFor[CompetitionEntity](entityId).ask(CompetitionCommand.Read)
       }.collect {
         case Some(player) => player
       }
@@ -51,7 +55,9 @@ class CompetitionServiceImpl(registry: PersistentEntityRegistry, system: ActorSy
   }
 
   override def addParticipant(id: Competition.Id) = ServiceCall { participant =>
-    refFor(id).ask(CompetitionCommand.AddParticipant(participant)).map { _ => NotUsed }
+    refFor(id).ask(CompetitionCommand.AddParticipant(participant)).map { _ =>
+      NotUsed
+    }
   }
 
   private def refFor(id: Competition.Id) = registry.refFor[CompetitionEntity](id.id.toString)

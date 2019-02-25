@@ -10,7 +10,14 @@ import com.lightbend.lagom.scaladsl.client.LagomServiceClientComponents
 import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
 import com.softwaremill.macwire._
 import com.typesafe.config.Config
-import controllers.{ AssetsComponents, BattleController, CompetitionController, PlayerController, RankingController, TeamController }
+import controllers.{
+  AssetsComponents,
+  BattleController,
+  CompetitionController,
+  PlayerController,
+  RankingController,
+  TeamController
+}
 import domain.{ BattleRepository, PlayerRepository, TeamRepository }
 import infra.mongodb.{ MongoDBBattleRepository, MongoDBPlayerRepository, MongoDBTeamRepository }
 import play.api.ApplicationLoader.Context
@@ -29,7 +36,8 @@ import service.PlayerRecordService
 import scala.collection.immutable
 import scala.concurrent.{ ExecutionContext, Future }
 
-abstract class WebGateway(context: Context) extends BuiltInComponentsFromContext(context)
+abstract class WebGateway(context: Context)
+  extends BuiltInComponentsFromContext(context)
   with DBComponents
   with AssetsComponents
   with I18nComponents
@@ -38,12 +46,11 @@ abstract class WebGateway(context: Context) extends BuiltInComponentsFromContext
   with LagomConfigComponent
   with LagomServiceClientComponents {
 
-  override lazy val serviceInfo: ServiceInfo = ServiceInfo(
-    "web-gateway",
-    Map(
-      "web-gateway" -> immutable.Seq(ServiceAcl.forPathRegex("(?!/api/).*"))))
+  override lazy val serviceInfo: ServiceInfo =
+    ServiceInfo("web-gateway", Map("web-gateway" -> immutable.Seq(ServiceAcl.forPathRegex("(?!/api/).*"))))
 
-  override lazy val httpFilters: Seq[EssentialFilter] = Seq(new CORSFilter(CORSConfig.fromConfiguration(configuration), httpErrorHandler))
+  override lazy val httpFilters: Seq[EssentialFilter] = Seq(
+    new CORSFilter(CORSConfig.fromConfiguration(configuration), httpErrorHandler))
 
   // set up logger
   LoggerConfigurator(context.environment.classLoader).foreach {
@@ -87,10 +94,13 @@ case class WebGatewayMessagesControllerComponents(
   messagesApi: MessagesApi,
   langs: Langs,
   fileMimeTypes: FileMimeTypes,
-  executionContext: scala.concurrent.ExecutionContext) extends MessagesControllerComponents
+  executionContext: scala.concurrent.ExecutionContext)
+  extends MessagesControllerComponents
 
-class WebGatewayMessagesActionBuilder(parser: BodyParser[AnyContent], messagesApi: MessagesApi)(implicit ec: ExecutionContext)
-  extends MessagesActionBuilderImpl(parser, messagesApi) with MessagesActionBuilder {
+class WebGatewayMessagesActionBuilder(parser: BodyParser[AnyContent], messagesApi: MessagesApi)(
+  implicit ec: ExecutionContext)
+  extends MessagesActionBuilderImpl(parser, messagesApi)
+  with MessagesActionBuilder {
   def this(parser: BodyParsers.Default, messagesApi: MessagesApi)(implicit ec: ExecutionContext) = {
     this(parser: BodyParser[AnyContent], messagesApi)
   }

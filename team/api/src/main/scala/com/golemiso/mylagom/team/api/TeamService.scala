@@ -20,7 +20,7 @@ trait TeamService extends Service {
       restCall(Method.GET, "/api/teams/:id", read _),
       restCall(Method.POST, "/api/teams/:id", update _),
       restCall(Method.DELETE, "/api/teams/:id", delete _),
-
-      restCall(Method.GET, "/api/teams", readAll))
+      restCall(Method.GET, "/api/teams", readAll)
+    )
   }
 }

@@ -8,15 +8,17 @@ import play.api.libs.json.Json
 
 import scala.concurrent.ExecutionContext
 
-class PlayerController(mcc: MessagesControllerComponents, service: PlayerService)(implicit ec: ExecutionContext) extends MessagesAbstractController(mcc) {
+class PlayerController(mcc: MessagesControllerComponents, service: PlayerService)(implicit ec: ExecutionContext)
+  extends MessagesAbstractController(mcc) {
 
   def get(id: Player.Id): Action[AnyContent] = Action.async { _ =>
-    service.read(id).invoke.map { player =>
-      Ok(Json.toJson(player))
-    }.recover {
-      case _: NotFound =>
-        NotFound
-    }
+    service
+      .read(id).invoke.map { player =>
+        Ok(Json.toJson(player))
+      }.recover {
+        case _: NotFound =>
+          NotFound
+      }
   }
 
   def delete(id: Player.Id): Action[AnyContent] = Action.async { _ =>
@@ -55,5 +57,6 @@ object PlayerResource {
   implicit def toEntity(playerResource: PlayerResource): domain.Player = {
     domain.Player(domain.PlayerID(playerResource.id.id), playerResource.name.name)
   }
-  implicit def fromEntity(player: domain.Player): PlayerResource = PlayerResource(Player.Id(player.id.value), Player.Name(player.name))
+  implicit def fromEntity(player: domain.Player): PlayerResource =
+    PlayerResource(Player.Id(player.id.value), Player.Name(player.name))
 }

@@ -16,25 +16,28 @@ class CompetitionEntity extends PersistentEntity {
 
   override def behavior: Behavior = {
     case Some(_) =>
-      Actions().onReadOnlyCommand[CompetitionCommand.Read.type, Option[Competition]] {
-        case (CompetitionCommand.Read, ctx, state) => ctx.reply(state)
-      }.onReadOnlyCommand[CompetitionCommand.Create, Done] {
-        case (CompetitionCommand.Create(_), ctx, _) => ctx.invalidCommand("Competition already exists")
-      }.onCommand[CompetitionCommand.AddParticipant, Done] {
-        case (CompetitionCommand.AddParticipant(participant), ctx, Some(competition)) =>
-          ctx.thenPersist(CompetitionEvent.ParticipantAdded(competition.addParticipant(participant)))(_ => ctx.reply(Done))
-      }.onEvent {
-        case (CompetitionEvent.ParticipantAdded(competition), _) => Some(competition)
-      }
+      Actions()
+        .onReadOnlyCommand[CompetitionCommand.Read.type, Option[Competition]] {
+          case (CompetitionCommand.Read, ctx, state) => ctx.reply(state)
+        }.onReadOnlyCommand[CompetitionCommand.Create, Done] {
+          case (CompetitionCommand.Create(_), ctx, _) => ctx.invalidCommand("Competition already exists")
+        }.onCommand[CompetitionCommand.AddParticipant, Done] {
+          case (CompetitionCommand.AddParticipant(participant), ctx, Some(competition)) =>
+            ctx.thenPersist(CompetitionEvent.ParticipantAdded(competition.addParticipant(participant)))(_ =>
+              ctx.reply(Done))
+        }.onEvent {
+          case (CompetitionEvent.ParticipantAdded(competition), _) => Some(competition)
+        }
     case None =>
-      Actions().onReadOnlyCommand[CompetitionCommand.Read.type, Option[Competition]] {
-        case (CompetitionCommand.Read, ctx, state) => ctx.reply(state)
-      }.onCommand[CompetitionCommand.Create, Done] {
-        case (CompetitionCommand.Create(competition), ctx, _) =>
-          ctx.thenPersist(CompetitionEvent.Created(competition))(_ => ctx.reply(Done))
-      }.onEvent {
-        case (CompetitionEvent.Created(competition), _) => Some(competition)
-      }
+      Actions()
+        .onReadOnlyCommand[CompetitionCommand.Read.type, Option[Competition]] {
+          case (CompetitionCommand.Read, ctx, state) => ctx.reply(state)
+        }.onCommand[CompetitionCommand.Create, Done] {
+          case (CompetitionCommand.Create(competition), ctx, _) =>
+            ctx.thenPersist(CompetitionEvent.Created(competition))(_ => ctx.reply(Done))
+        }.onEvent {
+          case (CompetitionEvent.Created(competition), _) => Some(competition)
+        }
   }
 }
 
@@ -63,8 +66,9 @@ object CompetitionEvent {
 }
 
 object CompetitionSerializerRegistry extends JsonSerializerRegistry {
-  override def serializers = List(
-    JsonSerializer[Competition],
-    JsonSerializer[CompetitionEvent.Created],
-    JsonSerializer[CompetitionEvent.ParticipantAdded])
+  override def serializers =
+    List(
+      JsonSerializer[Competition],
+      JsonSerializer[CompetitionEvent.Created],
+      JsonSerializer[CompetitionEvent.ParticipantAdded])
 }

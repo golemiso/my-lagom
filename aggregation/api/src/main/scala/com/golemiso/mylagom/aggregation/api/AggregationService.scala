@@ -20,6 +20,7 @@ trait AggregationService extends Service {
       restCall(Method.GET, "/api/competitions/:id", battleHistoriesBy _),
       restCall(Method.GET, "/api/battles/:id", battleDetails _),
       restCall(Method.GET, "/api/teams/:id", teamDetails _),
-      restCall(Method.GET, "/api/players/:id", playerDetails _))
+      restCall(Method.GET, "/api/players/:id", playerDetails _)
+    )
   }
 }

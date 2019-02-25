@@ -8,15 +8,17 @@ import play.api.libs.json.Json
 
 import scala.concurrent.ExecutionContext
 
-class BattleController(mcc: MessagesControllerComponents, service: BattleService)(implicit ec: ExecutionContext) extends MessagesAbstractController(mcc) {
+class BattleController(mcc: MessagesControllerComponents, service: BattleService)(implicit ec: ExecutionContext)
+  extends MessagesAbstractController(mcc) {
 
   def get(id: Battle.Id): Action[AnyContent] = Action.async { _ =>
-    service.read(id).invoke.map { battle =>
-      Ok(Json.toJson(battle))
-    }.recover {
-      case _: NotFound =>
-        NotFound
-    }
+    service
+      .read(id).invoke.map { battle =>
+        Ok(Json.toJson(battle))
+      }.recover {
+        case _: NotFound =>
+          NotFound
+      }
   }
 
   def delete(id: Battle.Id): Action[AnyContent] = Action.async { _ =>

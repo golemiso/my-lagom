@@ -15,33 +15,35 @@ class PlayerEntity extends PersistentEntity {
 
   override def behavior: Behavior = {
     case Some(_) =>
-      Actions().onReadOnlyCommand[PlayerCommand.Read.type, Option[Player]] {
-        case (PlayerCommand.Read, ctx, state) => ctx.reply(state)
-      }.onReadOnlyCommand[PlayerCommand.Create, Done] {
-        case (PlayerCommand.Create(_), ctx, _) => ctx.invalidCommand("Player already exists")
-      }.onCommand[PlayerCommand.Update, Done] {
-        case (PlayerCommand.Update(player), ctx, _) =>
-          ctx.thenPersist(PlayerEvent.Updated(player))(_ => ctx.reply(Done))
-      }.onCommand[PlayerCommand.Delete.type, Done] {
-        case (PlayerCommand.Delete, ctx, _) =>
-          ctx.thenPersist(PlayerEvent.Deleted)(_ => ctx.reply(Done))
-      }.onEvent {
-        case (PlayerEvent.Updated(player), _) => Some(player)
-        case (PlayerEvent.Deleted, _) => None
-      }
+      Actions()
+        .onReadOnlyCommand[PlayerCommand.Read.type, Option[Player]] {
+          case (PlayerCommand.Read, ctx, state) => ctx.reply(state)
+        }.onReadOnlyCommand[PlayerCommand.Create, Done] {
+          case (PlayerCommand.Create(_), ctx, _) => ctx.invalidCommand("Player already exists")
+        }.onCommand[PlayerCommand.Update, Done] {
+          case (PlayerCommand.Update(player), ctx, _) =>
+            ctx.thenPersist(PlayerEvent.Updated(player))(_ => ctx.reply(Done))
+        }.onCommand[PlayerCommand.Delete.type, Done] {
+          case (PlayerCommand.Delete, ctx, _) =>
+            ctx.thenPersist(PlayerEvent.Deleted)(_ => ctx.reply(Done))
+        }.onEvent {
+          case (PlayerEvent.Updated(player), _) => Some(player)
+          case (PlayerEvent.Deleted, _)         => None
+        }
     case None =>
-      Actions().onReadOnlyCommand[PlayerCommand.Read.type, Option[Player]] {
-        case (PlayerCommand.Read, ctx, state) => ctx.reply(state)
-      }.onCommand[PlayerCommand.Create, Done] {
-        case (PlayerCommand.Create(player), ctx, _) =>
-          ctx.thenPersist(PlayerEvent.Created(player))(_ => ctx.reply(Done))
-      }.onCommand[PlayerCommand.Update, Done] {
-        case (PlayerCommand.Update(player), ctx, _) =>
-          ctx.thenPersist(PlayerEvent.Updated(player))(_ => ctx.reply(Done))
-      }.onEvent {
-        case (PlayerEvent.Created(player), _) => Some(player)
-        case (PlayerEvent.Updated(player), _) => Some(player)
-      }
+      Actions()
+        .onReadOnlyCommand[PlayerCommand.Read.type, Option[Player]] {
+          case (PlayerCommand.Read, ctx, state) => ctx.reply(state)
+        }.onCommand[PlayerCommand.Create, Done] {
+          case (PlayerCommand.Create(player), ctx, _) =>
+            ctx.thenPersist(PlayerEvent.Created(player))(_ => ctx.reply(Done))
+        }.onCommand[PlayerCommand.Update, Done] {
+          case (PlayerCommand.Update(player), ctx, _) =>
+            ctx.thenPersist(PlayerEvent.Updated(player))(_ => ctx.reply(Done))
+        }.onEvent {
+          case (PlayerEvent.Created(player), _) => Some(player)
+          case (PlayerEvent.Updated(player), _) => Some(player)
+        }
   }
 }
 
@@ -71,9 +73,10 @@ object PlayerEvent {
 }
 
 object PlayerSerializerRegistry extends JsonSerializerRegistry {
-  override def serializers = List(
-    JsonSerializer[Player],
-    JsonSerializer[PlayerEvent.Created],
-    JsonSerializer[PlayerEvent.Updated],
-    JsonSerializer[PlayerEvent.Deleted.type])
+  override def serializers =
+    List(
+      JsonSerializer[Player],
+      JsonSerializer[PlayerEvent.Created],
+      JsonSerializer[PlayerEvent.Updated],
+      JsonSerializer[PlayerEvent.Deleted.type])
 }

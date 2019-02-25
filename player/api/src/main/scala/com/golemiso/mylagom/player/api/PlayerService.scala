@@ -20,7 +20,7 @@ trait PlayerService extends Service {
       restCall(Method.GET, "/api/players/:id", read _),
       restCall(Method.PUT, "/api/players/:id", update _),
       restCall(Method.DELETE, "/api/players/:id", delete _),
-
-      restCall(Method.GET, "/api/players", readAll))
+      restCall(Method.GET, "/api/players", readAll)
+    )
   }
 }

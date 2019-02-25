@@ -11,15 +11,17 @@ import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
 
-class TeamController(mcc: MessagesControllerComponents, service: TeamService)(implicit ec: ExecutionContext) extends MessagesAbstractController(mcc) {
+class TeamController(mcc: MessagesControllerComponents, service: TeamService)(implicit ec: ExecutionContext)
+  extends MessagesAbstractController(mcc) {
 
   def get(id: Team.Id): Action[AnyContent] = Action.async { _ =>
-    service.read(id).invoke.map { team =>
-      Ok(Json.toJson(team))
-    }.recover {
-      case _: NotFound =>
-        NotFound
-    }
+    service
+      .read(id).invoke.map { team =>
+        Ok(Json.toJson(team))
+      }.recover {
+        case _: NotFound =>
+          NotFound
+      }
   }
 
   def delete(id: Team.Id): Action[AnyContent] = Action.async { _ =>

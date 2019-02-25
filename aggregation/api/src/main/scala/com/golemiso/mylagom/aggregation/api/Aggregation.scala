@@ -12,7 +12,12 @@ case class CompetitionDetails(
   battleHistories: Seq[Battle])
 case class PlayerDetails(id: Player.Id)
 
-case class BattleDetails(id: Battle.Id, competition: Competition, mode: Battle.Mode, competitors: BattleDetails.Competitors, result: Option[Battle.Result])
+case class BattleDetails(
+  id: Battle.Id,
+  competition: Competition,
+  mode: Battle.Mode,
+  competitors: BattleDetails.Competitors,
+  result: Option[Battle.Result])
 object BattleDetails {
   implicit val format: Format[BattleDetails] = Json.format
 

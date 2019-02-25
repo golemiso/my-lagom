@@ -18,8 +18,8 @@ trait CompetitionService extends Service {
     named("competitions").withCalls(
       restCall(Method.POST, "/api/competitions", create _),
       restCall(Method.GET, "/api/competitions/:id", read _),
-
       restCall(Method.GET, "/api/competitions", readAll),
-      restCall(Method.POST, "/api/competitions/:id/participants", addParticipant _))
+      restCall(Method.POST, "/api/competitions/:id/participants", addParticipant _)
+    )
   }
 }

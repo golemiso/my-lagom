@@ -4,7 +4,8 @@ import java.util.UUID
 
 import scala.concurrent.Future
 
-case class Battle(id: BattleID, teams: Seq[Team], result: Option[BattleResult], mode: BattleMode) extends Entity[BattleID]
+case class Battle(id: BattleID, teams: Seq[Team], result: Option[BattleResult], mode: BattleMode)
+  extends Entity[BattleID]
 
 case class BattleID(value: UUID) extends IdObject
 object BattleID {

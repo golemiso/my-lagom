@@ -22,9 +22,9 @@ trait BattleService extends Service {
       restCall(Method.POST, "/api/battles", create _),
       restCall(Method.GET, "/api/battles/:id", read _),
       restCall(Method.DELETE, "/api/battles/:id", delete _),
-
       restCall(Method.GET, "/api/battles", readAll),
-      restCall(Method.PATCH, "/api/battles/:id/result", updateResult _))
+      restCall(Method.PATCH, "/api/battles/:id/result", updateResult _)
+    )
     //      .withTopics(topic("BattleEvent", this.events))
   }
 }

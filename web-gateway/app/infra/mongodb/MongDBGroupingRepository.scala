@@ -16,7 +16,8 @@ class MongoDBGroupingRepository(db: Future[DefaultDB])(implicit ec: ExecutionCon
   override def resolve: Future[Seq[Grouping]] = {
     for {
       collection <- groupingsCollection
-      groupings <- collection.find(BSONDocument()).cursor[GroupingDocument]().collect[Seq](1000, Cursor.FailOnError[Seq[GroupingDocument]]())
+      groupings <- collection
+        .find(BSONDocument()).cursor[GroupingDocument]().collect[Seq](1000, Cursor.FailOnError[Seq[GroupingDocument]]())
     } yield groupings
   }
 

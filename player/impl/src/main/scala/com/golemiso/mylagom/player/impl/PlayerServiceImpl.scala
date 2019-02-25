@@ -16,9 +16,13 @@ import com.lightbend.lagom.scaladsl.persistence.PersistentEntityRegistry
 
 import scala.concurrent.ExecutionContext
 
-class PlayerServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)(implicit ec: ExecutionContext, mat: Materializer) extends PlayerService {
+class PlayerServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)(
+  implicit ec: ExecutionContext,
+  mat: Materializer)
+  extends PlayerService {
 
-  private val currentIdsQuery = PersistenceQuery(system).readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
+  private val currentIdsQuery =
+    PersistenceQuery(system).readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
 
   override def create() = ServiceCall { request =>
     val id = Player.Id(UUID.randomUUID())
@@ -37,21 +41,25 @@ class PlayerServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
   }
 
   override def update(id: Player.Id) = ServiceCall { request =>
-    refFor(id).ask(PlayerCommand.Update(request(id))).map { _ => NotUsed }
+    refFor(id).ask(PlayerCommand.Update(request(id))).map { _ =>
+      NotUsed
+    }
   }
 
   override def delete(id: Player.Id) = ServiceCall { _ =>
-    refFor(id).ask(PlayerCommand.Delete).map { _ => NotUsed }
+    refFor(id).ask(PlayerCommand.Delete).map { _ =>
+      NotUsed
+    }
   }
 
   override def readAll = ServiceCall { _ =>
     // Note this should never make production....
-    currentIdsQuery.currentPersistenceIds()
+    currentIdsQuery
+      .currentPersistenceIds()
       .filter(_.startsWith("PlayerEntity|"))
       .mapAsync(4) { id =>
         val entityId = id.split("\\|", 2).last
-        registry.refFor[PlayerEntity](entityId)
-          .ask(PlayerCommand.Read)
+        registry.refFor[PlayerEntity](entityId).ask(PlayerCommand.Read)
       }.collect {
         case Some(player) => player
       }

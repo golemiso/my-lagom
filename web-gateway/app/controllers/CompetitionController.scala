@@ -11,7 +11,8 @@ import scala.concurrent.ExecutionContext
 class CompetitionController(
   mcc: MessagesControllerComponents,
   service: CompetitionService,
-  aggregationService: AggregationService)(implicit ec: ExecutionContext) extends MessagesAbstractController(mcc) {
+  aggregationService: AggregationService)(implicit ec: ExecutionContext)
+  extends MessagesAbstractController(mcc) {
 
   def get(id: Competition.Id): Action[AnyContent] = Action.async { _ =>
     service.read(id).invoke.map { competition =>

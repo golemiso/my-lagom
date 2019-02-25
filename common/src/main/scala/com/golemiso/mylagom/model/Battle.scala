@@ -4,7 +4,12 @@ import java.util.UUID
 
 import play.api.libs.json.{ Format, Json, Reads, Writes }
 
-case class Battle(id: Battle.Id, competition: Competition.Id, mode: Battle.Mode, competitors: Battle.Competitors, result: Option[Battle.Result]) {
+case class Battle(
+  id: Battle.Id,
+  competition: Competition.Id,
+  mode: Battle.Mode,
+  competitors: Battle.Competitors,
+  result: Option[Battle.Result]) {
   def apply(result: Battle.Result): Battle = copy(result = Some(result))
 }
 object Battle {
