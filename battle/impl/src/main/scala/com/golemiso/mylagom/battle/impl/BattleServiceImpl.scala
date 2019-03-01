@@ -10,7 +10,7 @@ import akka.stream.Materializer
 import akka.stream.scaladsl.Sink
 import com.golemiso.mylagom.battle.api
 import com.golemiso.mylagom.battle.api.BattleService
-import com.golemiso.mylagom.model.Battle
+import com.golemiso.mylagom.model.{ Battle, Competition }
 import com.lightbend.lagom.scaladsl.api.ServiceCall
 import com.lightbend.lagom.scaladsl.api.broker.Topic
 import com.lightbend.lagom.scaladsl.api.transport.NotFound
@@ -28,15 +28,15 @@ class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
   private val currentIdsQuery =
     PersistenceQuery(system).readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
 
-  override def create() = ServiceCall { request =>
+  override def create(competitionId: Competition.Id) = ServiceCall { request =>
     val id = Battle.Id(UUID.randomUUID())
-    refFor(id).ask(BattleCommand.Create(request(id))).map { _ =>
+    refFor(competitionId: Competition.Id).ask(BattleCommand.Create(request(id))).map { _ =>
       id
     }
   }
 
-  override def read(id: Battle.Id) = ServiceCall { _ =>
-    refFor(id).ask(BattleCommand.Read).map {
+  override def read(competitionId: Competition.Id, id: Battle.Id) = ServiceCall { _ =>
+    refFor(competitionId).ask(BattleCommand.Read).map {
       case Some(battle) =>
         battle
       case None =>
@@ -44,13 +44,13 @@ class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
     }
   }
 
-  override def delete(id: Battle.Id) = ServiceCall { _ =>
-    refFor(id).ask(BattleCommand.Delete).map { _ =>
+  override def delete(competitionId: Competition.Id, id: Battle.Id) = ServiceCall { _ =>
+    refFor(competitionId).ask(BattleCommand.Delete).map { _ =>
       NotUsed
     }
   }
 
-  override def readAll = ServiceCall { _ =>
+  override def readAll(competitionId: Competition.Id) = ServiceCall { _ =>
     // Note this should never make production....
     currentIdsQuery
       .currentPersistenceIds()
@@ -64,8 +64,8 @@ class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
       .runWith(Sink.seq)
   }
 
-  override def updateResult(id: Battle.Id) = ServiceCall { result =>
-    refFor(id).ask(BattleCommand.UpdateResult(result)).map { _ =>
+  override def updateResult(competitionId: Competition.Id, id: Battle.Id) = ServiceCall { result =>
+    refFor(competitionId).ask(BattleCommand.UpdateResult(result)).map { _ =>
       NotUsed
     }
   }
@@ -78,5 +78,5 @@ class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
   //    }
   //  }
 
-  private def refFor(id: Battle.Id) = registry.refFor[BattleEntity](id.id.toString)
+  private def refFor(competitionId: Competition.Id) = registry.refFor[BattleEntity](competitionId.id.toString)
 }
