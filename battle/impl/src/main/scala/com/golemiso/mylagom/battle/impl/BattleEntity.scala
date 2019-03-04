@@ -58,7 +58,7 @@ object BattleCommand {
   case object Read extends BattleCommand with ReplyType[Option[Battle]]
   case object Delete extends BattleCommand with ReplyType[Done]
 
-  case class UpdateResult(result: Battle.Result) extends BattleCommand with ReplyType[Done]
+  case class UpdateResult(result: Battle) extends BattleCommand with ReplyType[Done]
 }
 
 sealed trait BattleEvent extends AggregateEvent[BattleEvent] {

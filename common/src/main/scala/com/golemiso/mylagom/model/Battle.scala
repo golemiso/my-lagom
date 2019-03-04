@@ -4,23 +4,24 @@ import java.util.UUID
 
 import play.api.libs.json.{ Format, Json, Reads, Writes }
 
-sealed abstract class Battle(val id: Battle.Id)
+sealed abstract class Battle(val id: Battle.Id, val `type`: Battle.Type)
 
-case class TeamBattle(
-  override val id: Battle.Id,
-  mode: Battle.Mode,
-  competitors: Seq[Team.Id],
-  result: Option[TeamBattle.Result])
-  extends Battle(id) {
-  def apply(result: TeamBattle.Result): Battle = copy(result = Some(result))
-}
+case class TeamBattle(override val id: Battle.Id, mode: Battle.Mode, competitors: Seq[TeamBattle.Competitor])
+  extends Battle(id, Battle.Type.TeamBattle)
 object TeamBattle {
+  implicit val format: Format[TeamBattle] = Json.format
+
+  case class Competitor(team: Team.Id, result: Result)
+  object Competitor {
+    implicit val format: Format[Competitor] = Json.format
+  }
+
   sealed abstract class Result(val value: String)
   object Result {
-    case object VictoryLeft extends Result("victory_left")
-    case object VictoryRight extends Result("victory_right")
+    case object Victory extends Result("victory")
+    case object Defeat extends Result("defeat")
     case object Unknown extends Result("unknown")
-    val all: Seq[Result] = VictoryLeft :: VictoryRight :: Nil
+    val all: Seq[Result] = Victory :: Defeat :: Nil
     def apply(value: String): Result = all.find(_.value == value).getOrElse(Unknown)
     def unapply(result: Result): Option[String] = Some(result.value)
 
@@ -29,22 +30,22 @@ object TeamBattle {
   }
 }
 
-case class IndividualBattle(
-  override val id: Battle.Id,
-  mode: Battle.Mode,
-  competitors: Seq[Player.Id],
-  result: Option[IndividualBattle.Result])
-  extends Battle(id) {
-  def apply(result: IndividualBattle.Result): Battle = copy(result = Some(result))
-}
+case class IndividualBattle(override val id: Battle.Id, mode: Battle.Mode, competitors: Seq[Player.Id])
+  extends Battle(id, Battle.Type.IndividualBattle)
 object IndividualBattle {
+  implicit val format: Format[IndividualBattle] = Json.format
+
+  case class Competitor(player: Player.Id, result: Result)
+  object Competitor {
+    implicit val format: Format[Competitor] = Json.format
+  }
 
   sealed abstract class Result(val value: String)
   object Result {
-    case object VictoryLeft extends Result("victory_left")
-    case object VictoryRight extends Result("victory_right")
+    case object Victory extends Result("victory")
+    case object Defeat extends Result("defeat")
     case object Unknown extends Result("unknown")
-    val all: Seq[Result] = VictoryLeft :: VictoryRight :: Nil
+    val all: Seq[Result] = Victory :: Defeat :: Nil
     def apply(value: String): Result = all.find(_.value == value).getOrElse(Unknown)
     def unapply(result: Result): Option[String] = Some(result.value)
 
@@ -59,6 +60,21 @@ object Battle {
   case class Id(id: UUID) extends AnyVal
   object Id {
     implicit val format: Format[Id] = Json.valueFormat
+  }
+
+  sealed abstract class Type(val value: String)
+  object Type {
+    case object TeamBattle extends Type("team_battle")
+    case object IndividualBattle extends Type("individual_battle")
+    case object Unknown extends Type("unknown")
+    def apply(value: String): Type = value match {
+      case TeamBattle.value       => TeamBattle
+      case IndividualBattle.value => IndividualBattle
+      case _                      => Unknown
+    }
+    def unapply(`type`: Type): Option[String] = Some(`type`.value)
+    implicit val format: Format[Type] =
+      Format(Reads.StringReads.map(Type.apply), Writes.StringWrites.contramap(_.value))
   }
 
   sealed abstract class Mode(val value: String)
