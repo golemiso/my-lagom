@@ -30,42 +30,23 @@ class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
 
   override def create(competitionId: Competition.Id) = ServiceCall { request =>
     val id = Battle.Id(UUID.randomUUID())
-    refFor(competitionId: Competition.Id).ask(BattleCommand.Create(request(id))).map { _ =>
+    refFor(competitionId: Competition.Id).ask(BattleResultsCommand.Create(request(id))).map { _ =>
       id
     }
   }
 
   override def read(competitionId: Competition.Id, id: Battle.Id) = ServiceCall { _ =>
-    refFor(competitionId).ask(BattleCommand.Read).map {
-      case Some(battle) =>
-        battle
-      case None =>
-        throw NotFound(s"Battle with id ${id.id.toString}")
-    }
+    refFor(competitionId).ask(BattleResultsCommand.Read)
   }
 
   override def delete(competitionId: Competition.Id, id: Battle.Id) = ServiceCall { _ =>
-    refFor(competitionId).ask(BattleCommand.Delete).map { _ =>
+    refFor(competitionId).ask(BattleResultsCommand.Delete).map { _ =>
       NotUsed
     }
   }
 
-  override def readAll(competitionId: Competition.Id) = ServiceCall { _ =>
-    // Note this should never make production....
-    currentIdsQuery
-      .currentPersistenceIds()
-      .filter(_.startsWith("BattleEntity|"))
-      .mapAsync(4) { id =>
-        val entityId = id.split("\\|", 2).last
-        registry.refFor[BattleEntity](entityId).ask(BattleCommand.Read)
-      }.collect {
-        case Some(battle) => battle
-      }
-      .runWith(Sink.seq)
-  }
-
-  override def updateResult(competitionId: Competition.Id, id: Battle.Id) = ServiceCall { result =>
-    refFor(competitionId).ask(BattleCommand.UpdateResult(result)).map { _ =>
+  override def updateResults(competitionId: Competition.Id, id: Battle.Id) = ServiceCall { result =>
+    refFor(competitionId).ask(BattleResultsCommand.UpdateResults(result)).map { _ =>
       NotUsed
     }
   }
@@ -78,5 +59,5 @@ class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
   //    }
   //  }
 
-  private def refFor(competitionId: Competition.Id) = registry.refFor[BattleEntity](competitionId.id.toString)
+  private def refFor(competitionId: Competition.Id) = registry.refFor[BattleResultsEntity](competitionId.id.toString)
 }

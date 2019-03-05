@@ -17,7 +17,7 @@ abstract class BattleApplication(context: LagomApplicationContext)
   override lazy val lagomServer: LagomServer = serverFor[BattleService](wire[BattleServiceImpl])
   override lazy val jsonSerializerRegistry = BattleSerializerRegistry
 
-  persistentEntityRegistry.register(wire[BattleEntity])
+  persistentEntityRegistry.register(wire[BattleResultsEntity])
 }
 
 class BattleApplicationLoader extends LagomApplicationLoader {

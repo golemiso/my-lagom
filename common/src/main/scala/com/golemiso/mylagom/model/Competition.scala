@@ -3,26 +3,14 @@ package com.golemiso.mylagom.model
 import java.time.Instant
 import java.util.UUID
 
-import play.api.libs.json.{ Format, Json }
+import play.api.libs.json.{ Format, Json, Reads, Writes }
 
 case class Competition(
   id: Competition.Id,
   slug: Competition.Slug,
   name: Competition.Name,
   schedule: Competition.Schedule,
-  participants: Seq[Player.Id],
-  battleHistories: Seq[Battle.Id]) {
-
-  def addParticipant(playerId: Player.Id): Competition =
-    copy(participants = participants.filterNot(_ == playerId) :+ playerId)
-  def removeParticipant(playerId: Player.Id): Competition =
-    copy(participants = participants.filterNot(_ == playerId))
-
-  def addBattle(battleId: Battle.Id): Competition =
-    copy(battleHistories = battleHistories.filterNot(_ == battleId) :+ battleId)
-  def removeBattle(battleId: Battle.Id): Competition =
-    copy(battleHistories = battleHistories.filterNot(_ == battleId))
-}
+  battleStyle: Competition.BattleStyle)
 object Competition {
   implicit val format: Format[Competition] = Json.format
 
@@ -44,5 +32,20 @@ object Competition {
   case class Schedule(start: Instant, end: Instant)
   object Schedule {
     implicit val format: Format[Schedule] = Json.format
+  }
+
+  sealed abstract class BattleStyle(val value: String)
+  object BattleStyle {
+    case object Group extends BattleStyle("group")
+    case object Team extends BattleStyle("team")
+    case object Individual extends BattleStyle("individual")
+    case object Unknown extends BattleStyle("unknown")
+
+    val all: Seq[BattleStyle] = Group :: Team :: Individual :: Nil
+    def apply(value: String): BattleStyle = all.find(_.value == value).getOrElse(Unknown)
+    def unapply(result: BattleStyle): Option[String] = Some(result.value)
+
+    implicit val format: Format[BattleStyle] =
+      Format(Reads.StringReads.map(BattleStyle.apply), Writes.StringWrites.contramap(_.value))
   }
 }

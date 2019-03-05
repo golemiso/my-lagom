@@ -1,6 +1,6 @@
 package controllers
 
-import com.golemiso.mylagom.battle.api.{ BattleRequest, BattleService }
+import com.golemiso.mylagom.battle.api.{ TeamBattleRequest, BattleService }
 import com.golemiso.mylagom.model.Battle
 import com.lightbend.lagom.scaladsl.api.transport.NotFound
 import play.api.mvc._
@@ -33,7 +33,7 @@ class BattleController(mcc: MessagesControllerComponents, service: BattleService
     }
   }
 
-  def post(): Action[BattleRequest] = Action.async(parse.json[BattleRequest]) { request =>
+  def post(): Action[TeamBattleRequest] = Action.async(parse.json[TeamBattleRequest]) { request =>
     service.create().invoke(request.body).map { id =>
       Created(Json.toJson(id))
     }

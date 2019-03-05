@@ -7,12 +7,11 @@ import com.lightbend.lagom.scaladsl.api.transport.Method
 import com.lightbend.lagom.scaladsl.api.{ Descriptor, Service, ServiceCall }
 
 trait BattleService extends Service {
-  def create(competitionId: Competition.Id): ServiceCall[BattleRequest, Battle.Id]
-  def read(competitionId: Competition.Id, id: Battle.Id): ServiceCall[NotUsed, Battle]
+  def create(competitionId: Competition.Id): ServiceCall[TeamBattleRequest, Battle.Id]
+  def read(competitionId: Competition.Id, id: Battle.Id): ServiceCall[NotUsed, Seq[Battle]]
   def delete(competitionId: Competition.Id, id: Battle.Id): ServiceCall[NotUsed, NotUsed]
 
-  def readAll(competitionId: Competition.Id): ServiceCall[NotUsed, Seq[Battle]]
-  def updateResult(competitionId: Competition.Id, id: Battle.Id): ServiceCall[Battle.Result, NotUsed]
+  def updateResults(competitionId: Competition.Id, id: Battle.Id): ServiceCall[Seq[Battle.Result], NotUsed]
 
   //  def events: Topic[BattleEvent]
 
@@ -22,8 +21,7 @@ trait BattleService extends Service {
       restCall(Method.POST, "/api/competitions/:competitionId/battles", create _),
       restCall(Method.GET, "/api/competitions/:competitionId/battles/:id", read _),
       restCall(Method.DELETE, "/api/competitions/:competitionId/battles/:id", delete _),
-      restCall(Method.GET, "/api/competitions/:competitionId/battles", readAll _),
-      restCall(Method.PATCH, "/api/competitions/:competitionId/battles/:id/result", updateResult _)
+      restCall(Method.PATCH, "/api/competitions/:competitionId/battles/:id/result", updateResults _)
     )
     //      .withTopics(topic("BattleEvent", this.events))
   }
