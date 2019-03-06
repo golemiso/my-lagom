@@ -21,12 +21,6 @@ class CompetitionEntity extends PersistentEntity {
           case (CompetitionCommand.Read, ctx, state) => ctx.reply(state)
         }.onReadOnlyCommand[CompetitionCommand.Create, Done] {
           case (CompetitionCommand.Create(_), ctx, _) => ctx.invalidCommand("Competition already exists")
-        }.onCommand[CompetitionCommand.AddParticipant, Done] {
-          case (CompetitionCommand.AddParticipant(participant), ctx, Some(competition)) =>
-            ctx.thenPersist(CompetitionEvent.ParticipantAdded(competition.addParticipant(participant)))(_ =>
-              ctx.reply(Done))
-        }.onEvent {
-          case (CompetitionEvent.ParticipantAdded(competition), _) => Some(competition)
         }
     case None =>
       Actions()

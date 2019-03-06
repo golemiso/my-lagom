@@ -28,14 +28,17 @@ class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
   private val currentIdsQuery =
     PersistenceQuery(system).readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
 
-  override def create(competitionId: Competition.Id) = ServiceCall { request =>
-    val id = Battle.Id(UUID.randomUUID())
-    refFor(competitionId: Competition.Id).ask(BattleResultsCommand.Create(request(id))).map { _ =>
-      id
+  override def create(competitionId: Competition.Id) = ServiceCall { style =>
+    refFor(competitionId: Competition.Id).ask(BattleResultsCommand.Create(style)).map { _ =>
+      NotUsed
     }
   }
 
-  override def read(competitionId: Competition.Id, id: Battle.Id) = ServiceCall { _ =>
+  override def add(competitionId: Competition.Id) = ServiceCall { battle =>
+    refFor(competitionId: Competition.Id).ask(BattleResultsCommand.Add(battle))
+  }
+
+  override def read(competitionId: Competition.Id) = ServiceCall { _ =>
     refFor(competitionId).ask(BattleResultsCommand.Read)
   }
 
@@ -45,8 +48,8 @@ class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
     }
   }
 
-  override def updateResults(competitionId: Competition.Id, id: Battle.Id) = ServiceCall { result =>
-    refFor(competitionId).ask(BattleResultsCommand.UpdateResults(result)).map { _ =>
+  override def updateResults(competitionId: Competition.Id, id: Battle.Id) = ServiceCall { request =>
+    refFor(competitionId).ask(BattleResultsCommand.UpdateResults(request.id, request.results)).map { _ =>
       NotUsed
     }
   }

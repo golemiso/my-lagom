@@ -10,7 +10,7 @@ case class Competition(
   slug: Competition.Slug,
   name: Competition.Name,
   schedule: Competition.Schedule,
-  battleStyle: Competition.BattleStyle)
+  style: Competition.BattleStyle)
 object Competition {
   implicit val format: Format[Competition] = Json.format
 

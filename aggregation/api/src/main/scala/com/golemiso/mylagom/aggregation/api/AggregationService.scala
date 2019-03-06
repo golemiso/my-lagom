@@ -7,8 +7,6 @@ import com.lightbend.lagom.scaladsl.api.{ Descriptor, Service, ServiceCall }
 
 trait AggregationService extends Service {
 
-  def rankingsBy(id: Competition.Id): ServiceCall[NotUsed, Seq[PlayerRanking]]
-  def battleHistoriesBy(id: Competition.Id): ServiceCall[NotUsed, Seq[BattleDetails]]
   def battleDetails(id: Battle.Id): ServiceCall[NotUsed, Competition]
   def teamDetails(id: Team.Id): ServiceCall[NotUsed, Competition]
   def playerDetails(id: Player.Id): ServiceCall[NotUsed, Competition]
@@ -16,8 +14,6 @@ trait AggregationService extends Service {
   override def descriptor: Descriptor = {
     import Service._
     named("aggregation").withCalls(
-      restCall(Method.GET, "/api/competitions/:id/rankings", rankingsBy _),
-      restCall(Method.GET, "/api/competitions/:id", battleHistoriesBy _),
       restCall(Method.GET, "/api/battles/:id", battleDetails _),
       restCall(Method.GET, "/api/teams/:id", teamDetails _),
       restCall(Method.GET, "/api/players/:id", playerDetails _)

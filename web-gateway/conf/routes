@@ -28,11 +28,11 @@ POST    /teams                      controllers.TeamController.post()
 PUT     /teams/:id                  controllers.TeamController.put(id: com.golemiso.mylagom.model.Team.Id)
 DELETE  /teams/:id                  controllers.TeamController.delete(id: com.golemiso.mylagom.model.Team.Id)
 
-GET     /battles/:id                controllers.BattleController.get(id: com.golemiso.mylagom.model.Battle.Id)
-GET     /battles                    controllers.BattleController.getAll
-POST    /battles                    controllers.BattleController.post()
-DELETE  /battles/:id                controllers.BattleController.delete(id: com.golemiso.mylagom.model.Battle.Id)
-PATCH   /battles/:id/result         controllers.BattleController.patchResult(id: com.golemiso.mylagom.model.Battle.Id)
+#GET     /battles/:id                controllers.BattleController.get(id: com.golemiso.mylagom.model.Battle.Id)
+#GET     /battles                    controllers.BattleController.getAll
+#POST    /battles                    controllers.BattleController.post()
+#DELETE  /battles/:id                controllers.BattleController.delete(id: com.golemiso.mylagom.model.Battle.Id)
+#PATCH   /battles/:id/result         controllers.BattleController.patchResult(id: com.golemiso.mylagom.model.Battle.Id)
 
-GET     /competitions/:id/rankings  controllers.RankingController.get(id: com.golemiso.mylagom.model.Competition.Id)
-GET     /competitions/:id/battle-histories  controllers.CompetitionController.getBattleHistories(id: com.golemiso.mylagom.model.Competition.Id)
+#GET     /competitions/:id/rankings  controllers.RankingController.get(id: com.golemiso.mylagom.model.Competition.Id)
+#GET     /competitions/:id/battle-histories  controllers.CompetitionController.getBattleHistories(id: com.golemiso.mylagom.model.Competition.Id)

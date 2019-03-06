@@ -38,9 +38,4 @@ class CompetitionController(
     }
   }
 
-  def getBattleHistories(id: Competition.Id): Action[AnyContent] = Action.async { _ =>
-    aggregationService.battleHistoriesBy(id).invoke.map { battles =>
-      Ok(Json.toJson(battles))
-    }
-  }
 }

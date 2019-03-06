@@ -6,7 +6,7 @@ import play.api.libs.json._
 
 sealed trait Battle
 object Battle {
-  implicit val format: Format[Battle] = Json.format
+  implicit val format: Format[Battle] = julienrf.json.derived.flat.oformat((__ \ "type").format[String])
 
   case class Id(id: UUID) extends AnyVal
   object Id {
@@ -32,6 +32,8 @@ object Battle {
 
 case class Result(id: Result.Id, name: Result.Name, point: Int)
 object Result {
+  implicit val format: Format[Result] = Json.format
+
   case class Id(id: UUID) extends AnyVal
   object Id {
     implicit val format: Format[Id] = Json.valueFormat

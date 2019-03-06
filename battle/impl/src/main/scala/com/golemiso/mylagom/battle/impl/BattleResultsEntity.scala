@@ -26,22 +26,6 @@ class BattleResultsEntity(registry: PersistentEntityRegistry) extends Persistent
     case _: BattleResultsStatus.GroupBattleResultsStatus      => groupBattle
     case _: BattleResultsStatus.TeamBattleResultsStatus       => teamBattle
     case _: BattleResultsStatus.IndividualBattleResultsStatus => individualBattle
-    case _ =>
-      Actions()
-        .onReadOnlyCommand[BattleResultsCommand.Read.type, BattleResultsStatus] {
-          case (BattleResultsCommand.Read, ctx, state) => ctx.reply(state)
-        }.onReadOnlyCommand[BattleResultsCommand.Create, Done] {
-          case (BattleResultsCommand.Create(_), ctx, _) => ctx.invalidCommand("Battle already exists")
-        }.onCommand[BattleResultsCommand.UpdateResults, Done] {
-          case (BattleResultsCommand.UpdateResults(result), ctx, BattleHistoryStatus(battles)) =>
-            ctx.thenPersist(BattleResultsEvent.ResultUpdated(battle(result)))(_ => ctx.reply(Done))
-        }.onCommand[BattleResultsCommand.Delete.type, Done] {
-          case (BattleResultsCommand.Delete, ctx, _) =>
-            ctx.thenPersist(BattleResultsEvent.Deleted)(_ => ctx.reply(Done))
-        }.onEvent {
-          case (BattleResultsEvent.ResultUpdated(battle), _) => Some(battle)
-          case (BattleResultsEvent.Deleted, _)               => BattleResultsStatus(Nil)
-        }
   }
 
   private val notConfigured = {
@@ -64,10 +48,19 @@ class BattleResultsEntity(registry: PersistentEntityRegistry) extends Persistent
 
   private val groupBattle = {
     Actions()
-      .onReadOnlyCommand[BattleResultsCommand.Read.type, BattleResultsStatus] {
-        case (BattleResultsCommand.Read, ctx, state) => ctx.reply(state)
-      }.onReadOnlyCommand[BattleResultsCommand.Create, Done] {
-        case (BattleResultsCommand.Create(_), ctx, _) => ctx.invalidCommand("Battle already exists")
+      .onReadOnlyCommand[BattleResultsCommand.Read.type, Seq[Battle]] {
+        case (BattleResultsCommand.Read, ctx, BattleResultsStatus.GroupBattleResultsStatus(_, _, battles)) =>
+          ctx.reply(battles)
+      }.onCommand[BattleResultsCommand.Add, Battle.Id] {
+        case (BattleResultsCommand.Add(battle), ctx, _) =>
+          battle match {
+            case GroupBattle(id, _, _) =>
+              ctx.thenPersist(BattleResultsEvent.Added(battle))(_ => ctx.reply(id))
+            case TeamBattle(id, _, _) =>
+              ctx.thenPersist(BattleResultsEvent.Added(battle))(_ => ctx.reply(id))
+            case IndividualBattle(id, _, _) =>
+              ctx.thenPersist(BattleResultsEvent.Added(battle))(_ => ctx.reply(id))
+          }
       }.onCommand[BattleResultsCommand.UpdateResults, Done] {
         case (BattleResultsCommand.UpdateResults(battle, playersResultPairs), ctx, _) =>
           ctx.thenPersist(BattleResultsEvent.ResultUpdated(battle, playersResultPairs))(_ => ctx.reply(Done))
@@ -75,18 +68,15 @@ class BattleResultsEntity(registry: PersistentEntityRegistry) extends Persistent
         case (BattleResultsCommand.Delete, ctx, _) =>
           ctx.thenPersist(BattleResultsEvent.Deleted)(_ => ctx.reply(Done))
       }.onEvent {
-        case (BattleResultsEvent.ResultUpdated(battle, playersResultPairs), state: BattleResultsStatus.GroupBattleResultsStatus) =>
-          state.battles.find(_.id == battle).map { b =>
-            b.competitors.
-          }
-        case (BattleResultsEvent.Deleted, _)               => BattleResultsStatus.NotConfigured
+        case (BattleResultsEvent.Deleted, _) => BattleResultsStatus.NotConfigured
       }
   }
 
   private val teamBattle = {
     Actions()
-      .onReadOnlyCommand[BattleResultsCommand.Read.type, BattleResultsStatus] {
-        case (BattleResultsCommand.Read, ctx, state) => ctx.reply(state)
+      .onReadOnlyCommand[BattleResultsCommand.Read.type, Seq[Battle]] {
+        case (BattleResultsCommand.Read, ctx, BattleResultsStatus.TeamBattleResultsStatus(_, _, battles)) =>
+          ctx.reply(battles)
       }.onCommand[BattleResultsCommand.Delete.type, Done] {
         case (BattleResultsCommand.Delete, ctx, _) =>
           ctx.thenPersist(BattleResultsEvent.Deleted)(_ => ctx.reply(Done))
@@ -97,8 +87,9 @@ class BattleResultsEntity(registry: PersistentEntityRegistry) extends Persistent
 
   private val individualBattle = {
     Actions()
-      .onReadOnlyCommand[BattleResultsCommand.Read.type, BattleResultsStatus] {
-        case (BattleResultsCommand.Read, ctx, state) => ctx.reply(state)
+      .onReadOnlyCommand[BattleResultsCommand.Read.type, Seq[Battle]] {
+        case (BattleResultsCommand.Read, ctx, BattleResultsStatus.IndividualBattleResultsStatus(_, _, battles)) =>
+          ctx.reply(battles)
       }.onCommand[BattleResultsCommand.Delete.type, Done] {
         case (BattleResultsCommand.Delete, ctx, _) =>
           ctx.thenPersist(BattleResultsEvent.Deleted)(_ => ctx.reply(Done))
@@ -113,7 +104,7 @@ class BattleResultsEntity(registry: PersistentEntityRegistry) extends Persistent
 sealed trait BattleResultsCommand
 object BattleResultsCommand {
   case class Create(style: Competition.BattleStyle) extends BattleResultsCommand with ReplyType[Done]
-  case class Add(battle: Battle) extends BattleResultsCommand with ReplyType[Done]
+  case class Add(battle: Battle) extends BattleResultsCommand with ReplyType[Battle.Id]
   case object Read extends BattleResultsCommand with ReplyType[Seq[Battle]]
   case object Delete extends BattleResultsCommand with ReplyType[Done]
 
