@@ -10,7 +10,7 @@ case class Competition(
   slug: Competition.Slug,
   name: Competition.Name,
   schedule: Competition.Schedule,
-  style: Competition.BattleStyle)
+  style: Competition.Style)
 object Competition {
   implicit val format: Format[Competition] = Json.format
 
@@ -34,18 +34,18 @@ object Competition {
     implicit val format: Format[Schedule] = Json.format
   }
 
-  sealed abstract class BattleStyle(val value: String)
-  object BattleStyle {
-    case object Group extends BattleStyle("group")
-    case object Team extends BattleStyle("team")
-    case object Individual extends BattleStyle("individual")
-    case object Unknown extends BattleStyle("unknown")
+  sealed abstract class Style(val value: String)
+  object Style {
+    case object Group extends Style("group")
+    case object Team extends Style("team")
+    case object Individual extends Style("individual")
+    case object Unknown extends Style("unknown")
 
-    val all: Seq[BattleStyle] = Group :: Team :: Individual :: Nil
-    def apply(value: String): BattleStyle = all.find(_.value == value).getOrElse(Unknown)
-    def unapply(result: BattleStyle): Option[String] = Some(result.value)
+    val all: Seq[Style] = Group :: Team :: Individual :: Nil
+    def apply(value: String): Style = all.find(_.value == value).getOrElse(Unknown)
+    def unapply(result: Style): Option[String] = Some(result.value)
 
-    implicit val format: Format[BattleStyle] =
-      Format(Reads.StringReads.map(BattleStyle.apply), Writes.StringWrites.contramap(_.value))
+    implicit val format: Format[Style] =
+      Format(Reads.StringReads.map(Style.apply), Writes.StringWrites.contramap(_.value))
   }
 }

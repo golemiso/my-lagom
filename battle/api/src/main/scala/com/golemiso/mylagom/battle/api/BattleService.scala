@@ -7,7 +7,7 @@ import com.lightbend.lagom.scaladsl.api.transport.Method
 import com.lightbend.lagom.scaladsl.api.{ Descriptor, Service, ServiceCall }
 
 trait BattleService extends Service {
-  def create(competitionId: Competition.Id): ServiceCall[Competition.BattleStyle, NotUsed]
+  def create(competitionId: Competition.Id): ServiceCall[Competition.Style, NotUsed]
   def add(competitionId: Competition.Id): ServiceCall[Battle, Battle.Id]
   def read(competitionId: Competition.Id): ServiceCall[NotUsed, Seq[Battle]]
   def delete(competitionId: Competition.Id, id: Battle.Id): ServiceCall[NotUsed, NotUsed]

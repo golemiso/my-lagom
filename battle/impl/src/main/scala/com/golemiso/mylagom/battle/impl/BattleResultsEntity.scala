@@ -36,11 +36,11 @@ class BattleResultsEntity(registry: PersistentEntityRegistry) extends Persistent
       }.onEvent {
         case (BattleResultsEvent.Created(style), _) =>
           style match {
-            case Competition.BattleStyle.Group =>
+            case Competition.Style.Group =>
               BattleResultsStatus.GroupBattleResultsStatus(Nil, Nil, Nil)
-            case Competition.BattleStyle.Team =>
+            case Competition.Style.Team =>
               BattleResultsStatus.TeamBattleResultsStatus(Nil, Nil, Nil)
-            case Competition.BattleStyle.Individual =>
+            case Competition.Style.Individual =>
               BattleResultsStatus.IndividualBattleResultsStatus(Nil, Nil, Nil)
           }
       }
@@ -103,7 +103,7 @@ class BattleResultsEntity(registry: PersistentEntityRegistry) extends Persistent
 
 sealed trait BattleResultsCommand
 object BattleResultsCommand {
-  case class Create(style: Competition.BattleStyle) extends BattleResultsCommand with ReplyType[Done]
+  case class Create(style: Competition.Style) extends BattleResultsCommand with ReplyType[Done]
   case class Add(battle: Battle) extends BattleResultsCommand with ReplyType[Battle.Id]
   case object Read extends BattleResultsCommand with ReplyType[Seq[Battle]]
   case object Delete extends BattleResultsCommand with ReplyType[Done]
@@ -119,7 +119,7 @@ sealed trait BattleResultsEvent extends AggregateEvent[BattleResultsEvent] {
 object BattleResultsEvent {
   val Tag: AggregateEventTag[BattleResultsEvent] = AggregateEventTag[BattleResultsEvent]
 
-  case class Created(style: Competition.BattleStyle) extends BattleResultsEvent
+  case class Created(style: Competition.Style) extends BattleResultsEvent
   object Created {
     implicit val format: Format[Created] = Json.format
   }

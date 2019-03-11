@@ -7,7 +7,7 @@ case class CompetitionRequest(
   slug: Competition.Slug,
   name: Competition.Name,
   schedule: Competition.Schedule,
-  style: Competition.BattleStyle) {
+  style: Competition.Style) {
   def apply(id: Competition.Id) = Competition(id, slug, name, schedule, style)
 }
 object CompetitionRequest {
