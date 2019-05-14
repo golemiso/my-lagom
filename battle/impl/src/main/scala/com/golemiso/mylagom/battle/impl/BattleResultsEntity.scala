@@ -3,7 +3,7 @@ package com.golemiso.mylagom.battle.impl
 import java.util.UUID
 
 import akka.Done
-import com.golemiso.mylagom.battle.api.TeamBattleResultRequest.PlayersResultPair
+import com.golemiso.mylagom.battle.api.BattleResultRequest
 import com.golemiso.mylagom.model._
 import com.lightbend.lagom.scaladsl.persistence.{
   AggregateEvent,
@@ -19,96 +19,40 @@ class BattleResultsEntity(registry: PersistentEntityRegistry) extends Persistent
   override type Command = BattleResultsCommand
   override type Event = BattleResultsEvent
   override type State = BattleResultsStatus
-  override def initialState: State = BattleResultsStatus.NotConfigured
+  override def initialState: State = BattleResultsStatus(Nil, Nil)
 
-  override def behavior: Behavior = {
-    case BattleResultsStatus.NotConfigured                    => notConfigured
-    case _: BattleResultsStatus.GroupBattleResultsStatus      => groupBattle
-    case _: BattleResultsStatus.TeamBattleResultsStatus       => teamBattle
-    case _: BattleResultsStatus.IndividualBattleResultsStatus => individualBattle
-  }
-
-  private val notConfigured = {
-    Actions()
-      .onCommand[BattleResultsCommand.Create, Done] {
-        case (BattleResultsCommand.Create(style), ctx, _) =>
-          ctx.thenPersist(BattleResultsEvent.Created(style))(_ => ctx.reply(Done))
-      }.onEvent {
-        case (BattleResultsEvent.Created(style), _) =>
-          style match {
-            case Competition.Style.Group =>
-              BattleResultsStatus.GroupBattleResultsStatus(Nil, Nil, Nil)
-            case Competition.Style.Team =>
-              BattleResultsStatus.TeamBattleResultsStatus(Nil, Nil, Nil)
-            case Competition.Style.Individual =>
-              BattleResultsStatus.IndividualBattleResultsStatus(Nil, Nil, Nil)
-          }
-      }
-  }
-
-  private val groupBattle = {
+  override def behavior: Behavior = { _ =>
     Actions()
       .onReadOnlyCommand[BattleResultsCommand.Read.type, Seq[Battle]] {
-        case (BattleResultsCommand.Read, ctx, BattleResultsStatus.GroupBattleResultsStatus(_, _, battles)) =>
+        case (BattleResultsCommand.Read, ctx, BattleResultsStatus(_, battles)) =>
           ctx.reply(battles)
       }.onCommand[BattleResultsCommand.Add, Battle.Id] {
         case (BattleResultsCommand.Add(battle), ctx, _) =>
-          battle match {
-            case GroupBattle(id, _, _) =>
-              ctx.thenPersist(BattleResultsEvent.Added(battle))(_ => ctx.reply(id))
-            case TeamBattle(id, _, _) =>
-              ctx.thenPersist(BattleResultsEvent.Added(battle))(_ => ctx.reply(id))
-            case IndividualBattle(id, _, _) =>
-              ctx.thenPersist(BattleResultsEvent.Added(battle))(_ => ctx.reply(id))
-          }
+          ctx.thenPersist(BattleResultsEvent.Added(battle))(_ => ctx.reply(battle.id))
       }.onCommand[BattleResultsCommand.UpdateResults, Done] {
-        case (BattleResultsCommand.UpdateResults(battle, playersResultPairs), ctx, _) =>
-          ctx.thenPersist(BattleResultsEvent.ResultUpdated(battle, playersResultPairs))(_ => ctx.reply(Done))
+        case (BattleResultsCommand.UpdateResults(battle, results), ctx, _) =>
+          ctx.thenPersist(BattleResultsEvent.ResultUpdated(battle, results))(_ => ctx.reply(Done))
       }.onCommand[BattleResultsCommand.Delete.type, Done] {
         case (BattleResultsCommand.Delete, ctx, _) =>
           ctx.thenPersist(BattleResultsEvent.Deleted)(_ => ctx.reply(Done))
       }.onEvent {
-        case (BattleResultsEvent.Deleted, _) => BattleResultsStatus.NotConfigured
+        case (BattleResultsEvent.BattleUpdated(battle), state) =>
+          state.updateBattle(battle)
+        case (BattleResultsEvent.Deleted, _) => initialState
       }
   }
 
-  private val teamBattle = {
-    Actions()
-      .onReadOnlyCommand[BattleResultsCommand.Read.type, Seq[Battle]] {
-        case (BattleResultsCommand.Read, ctx, BattleResultsStatus.TeamBattleResultsStatus(_, _, battles)) =>
-          ctx.reply(battles)
-      }.onCommand[BattleResultsCommand.Delete.type, Done] {
-        case (BattleResultsCommand.Delete, ctx, _) =>
-          ctx.thenPersist(BattleResultsEvent.Deleted)(_ => ctx.reply(Done))
-      }.onEvent {
-        case (BattleResultsEvent.Deleted, _) => BattleResultsStatus.NotConfigured
-      }
-  }
-
-  private val individualBattle = {
-    Actions()
-      .onReadOnlyCommand[BattleResultsCommand.Read.type, Seq[Battle]] {
-        case (BattleResultsCommand.Read, ctx, BattleResultsStatus.IndividualBattleResultsStatus(_, _, battles)) =>
-          ctx.reply(battles)
-      }.onCommand[BattleResultsCommand.Delete.type, Done] {
-        case (BattleResultsCommand.Delete, ctx, _) =>
-          ctx.thenPersist(BattleResultsEvent.Deleted)(_ => ctx.reply(Done))
-      }.onEvent {
-        case (BattleResultsEvent.Deleted, _) => BattleResultsStatus.NotConfigured
-      }
-  }
-
-  def id = Battle.Id(UUID.fromString(entityId))
+  def id = Competition.Id(UUID.fromString(entityId))
 }
 
 sealed trait BattleResultsCommand
 object BattleResultsCommand {
-  case class Create(style: Competition.Style) extends BattleResultsCommand with ReplyType[Done]
+  case class Create() extends BattleResultsCommand with ReplyType[Done]
   case class Add(battle: Battle) extends BattleResultsCommand with ReplyType[Battle.Id]
   case object Read extends BattleResultsCommand with ReplyType[Seq[Battle]]
   case object Delete extends BattleResultsCommand with ReplyType[Done]
 
-  case class UpdateResults(battle: Battle.Id, playersResultPairs: Seq[PlayersResultPair])
+  case class UpdateResults(battle: Battle.Id, results: Seq[BattleResultRequest.CompetitorResultPair])
     extends BattleResultsCommand
     with ReplyType[Done]
 }
@@ -119,11 +63,6 @@ sealed trait BattleResultsEvent extends AggregateEvent[BattleResultsEvent] {
 object BattleResultsEvent {
   val Tag: AggregateEventTag[BattleResultsEvent] = AggregateEventTag[BattleResultsEvent]
 
-  case class Created(style: Competition.Style) extends BattleResultsEvent
-  object Created {
-    implicit val format: Format[Created] = Json.format
-  }
-
   case class Added(battle: Battle) extends BattleResultsEvent
   object Added {
     implicit val format: Format[Added] = Json.format
@@ -133,37 +72,36 @@ object BattleResultsEvent {
     implicit val format: Format[Deleted.type] = JsonSerializer.emptySingletonFormat(Deleted)
   }
 
-  case class ResultUpdated(battle: Battle.Id, playersResultPairs: Seq[PlayersResultPair]) extends BattleResultsEvent
+  case class BattleUpdated(battle: Battle) extends BattleResultsEvent
+  object BattleUpdated {
+    implicit val format: Format[BattleUpdated] = Json.format
+  }
+
+  case class ResultUpdated(battle: Battle.Id, results: Seq[BattleResultRequest.CompetitorResultPair])
+    extends BattleResultsEvent
   object ResultUpdated {
     implicit val format: Format[ResultUpdated] = Json.format
   }
 }
 
-sealed trait BattleResultsStatus
-object BattleResultsStatus {
-  case class GroupBattleResultsStatus(
-    resultConfigurations: Seq[Result],
-    participants: Seq[Player.Id],
-    battles: Seq[GroupBattle])
-    extends BattleResultsStatus
-  case class TeamBattleResultsStatus(
-    resultConfigurations: Seq[Result],
-    participants: Seq[Team.Id],
-    battles: Seq[TeamBattle])
-    extends BattleResultsStatus
-  case class IndividualBattleResultsStatus(
-    resultConfigurations: Seq[Result],
-    participants: Seq[Player.Id],
-    battles: Seq[IndividualBattle])
-    extends BattleResultsStatus
-  case object NotConfigured extends BattleResultsStatus
+case class BattleResultsStatus(battleHistories: Seq[Battle], battlesInProgress: Seq[Battle]) {
+  def updateBattle(battle: Battle): BattleResultsStatus = {
+    if (battle.competitors.exists(_.result.isEmpty)) {
+      copy(
+        battleHistories = battleHistories.filterNot(_.id == battle.id),
+        battlesInProgress = battlesInProgress.filterNot(_.id == battle.id) :+ battle)
+    } else {
+      copy(
+        battleHistories = battleHistories.filterNot(_.id == battle.id) :+ battle,
+        battlesInProgress = battlesInProgress.filterNot(_.id == battle.id))
+    }
+  }
 }
 
 object BattleSerializerRegistry extends JsonSerializerRegistry {
   override def serializers =
     List(
       JsonSerializer[Battle],
-      JsonSerializer[BattleResultsEvent.Created],
       JsonSerializer[BattleResultsEvent.Deleted.type],
       JsonSerializer[BattleResultsEvent.ResultUpdated]
     )

@@ -38,7 +38,7 @@ class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
     refFor(competitionId: Competition.Id).ask(BattleResultsCommand.Add(battle))
   }
 
-  override def read(competitionId: Competition.Id) = ServiceCall { _ =>
+  override def readBattleHistories(competitionId: Competition.Id) = ServiceCall { _ =>
     refFor(competitionId).ask(BattleResultsCommand.Read)
   }
 

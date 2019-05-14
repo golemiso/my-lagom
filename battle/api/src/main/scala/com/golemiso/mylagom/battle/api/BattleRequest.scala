@@ -3,20 +3,19 @@ package com.golemiso.mylagom.battle.api
 import com.golemiso.mylagom.model._
 import play.api.libs.json.{ Format, Json }
 
-case class TeamBattleRequest(mode: Battle.Mode, competitors: Seq[TeamBattle.Competitor]) {
-  def apply(id: Battle.Id): Battle = TeamBattle(id, mode, competitors)
+case class BattleRequest(mode: Battle.Mode, competitors: Seq[Battle.Competitor]) {
+  def apply(id: Battle.Id): Battle = Battle(id, mode, competitors)
 }
-object TeamBattleRequest {
-  implicit val format: Format[TeamBattleRequest] = Json.format
+object BattleRequest {
+  implicit val format: Format[BattleRequest] = Json.format
 }
 
-case class TeamBattleResultRequest(id: Battle.Id, results: Seq[TeamBattleResultRequest.PlayersResultPair])
-object TeamBattleResultRequest {
-  implicit val format: Format[TeamBattleResultRequest] = Json.format
+case class BattleResultRequest(id: Battle.Id, results: Seq[BattleResultRequest.CompetitorResultPair])
+object BattleResultRequest {
+  implicit val format: Format[BattleResultRequest] = Json.format
 
-  case class PlayersResultPair(players: Seq[Player.Id], result: Result.Id)
-  object PlayersResultPair {
-    implicit val format: Format[PlayersResultPair] = Json.format
-
+  case class CompetitorResultPair(competitor: Battle.Competitor.Id, result: Result.Id)
+  object CompetitorResultPair {
+    implicit val format: Format[CompetitorResultPair] = Json.format
   }
 }
