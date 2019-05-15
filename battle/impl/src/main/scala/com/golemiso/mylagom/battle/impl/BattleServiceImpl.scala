@@ -10,7 +10,7 @@ import akka.stream.Materializer
 import akka.stream.scaladsl.Sink
 import com.golemiso.mylagom.battle.api
 import com.golemiso.mylagom.battle.api.BattleService
-import com.golemiso.mylagom.model.{ Battle, Competition }
+import com.golemiso.mylagom.model.{ Battle, Competition, Settings }
 import com.lightbend.lagom.scaladsl.api.ServiceCall
 import com.lightbend.lagom.scaladsl.api.broker.Topic
 import com.lightbend.lagom.scaladsl.api.transport.NotFound
@@ -25,20 +25,16 @@ class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
   mat: Materializer)
   extends BattleService {
 
-  private val currentIdsQuery =
-    PersistenceQuery(system).readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
-
-  override def create(competitionId: Competition.Id) = ServiceCall { style =>
-    refFor(competitionId: Competition.Id).ask(BattleResultsCommand.Create(style)).map { _ =>
-      NotUsed
-    }
-  }
-
   override def add(competitionId: Competition.Id) = ServiceCall { battle =>
-    refFor(competitionId: Competition.Id).ask(BattleResultsCommand.Add(battle))
+    val id = Battle.Id(UUID.randomUUID())
+    refFor(competitionId: Competition.Id).ask(BattleResultsCommand.Add(battle(id)))
   }
 
   override def readBattleHistories(competitionId: Competition.Id) = ServiceCall { _ =>
+    refFor(competitionId).ask(BattleResultsCommand.Read)
+  }
+
+  override def readBattlesInProgress(competitionId: Competition.Id) = ServiceCall { _ =>
     refFor(competitionId).ask(BattleResultsCommand.Read)
   }
 
@@ -50,6 +46,16 @@ class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
 
   override def updateResults(competitionId: Competition.Id, id: Battle.Id) = ServiceCall { request =>
     refFor(competitionId).ask(BattleResultsCommand.UpdateResults(request.id, request.results)).map { _ =>
+      NotUsed
+    }
+  }
+
+  override def replaceModes(id: Competition.Id): ServiceCall[Seq[Settings.Mode], NotUsed] = ???
+  override def addGroupingPattern(id: Competition.Id): ServiceCall[Settings.GroupingPattern, NotUsed] = ???
+  override def addResultPattern(id: Competition.Id): ServiceCall[Settings.ResultPattern, NotUsed] = ???
+
+  override def addParticipant(id: Competition.Id) = ServiceCall { participant =>
+    refFor(id).ask(BattleResultsCommand.AddParticipant(participant)).map { _ =>
       NotUsed
     }
   }

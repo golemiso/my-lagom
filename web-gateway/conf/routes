@@ -21,13 +21,6 @@ GET     /competitions/:id           controllers.CompetitionController.get(id: co
 POST    /competitions               controllers.CompetitionController.post()
 POST    /competitions/:id/participant               controllers.CompetitionController.postParticipant(id: com.golemiso.mylagom.model.Competition.Id)
 
-GET     /teams/:id                  controllers.TeamController.get(id: com.golemiso.mylagom.model.Team.Id)
-GET     /teams/:id/detail           controllers.TeamController.get(id: com.golemiso.mylagom.model.Team.Id)
-GET     /teams                      controllers.TeamController.getAll
-POST    /teams                      controllers.TeamController.post()
-PUT     /teams/:id                  controllers.TeamController.put(id: com.golemiso.mylagom.model.Team.Id)
-DELETE  /teams/:id                  controllers.TeamController.delete(id: com.golemiso.mylagom.model.Team.Id)
-
 #GET     /battles/:id                controllers.BattleController.get(id: com.golemiso.mylagom.model.Battle.Id)
 #GET     /battles                    controllers.BattleController.getAll
 #POST    /battles                    controllers.BattleController.post()

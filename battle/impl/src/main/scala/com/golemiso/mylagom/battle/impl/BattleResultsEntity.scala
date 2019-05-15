@@ -19,12 +19,12 @@ class BattleResultsEntity(registry: PersistentEntityRegistry) extends Persistent
   override type Command = BattleResultsCommand
   override type Event = BattleResultsEvent
   override type State = BattleResultsStatus
-  override def initialState: State = BattleResultsStatus(Nil, Nil)
+  override def initialState: State = BattleResultsStatus(Nil)
 
   override def behavior: Behavior = { _ =>
     Actions()
       .onReadOnlyCommand[BattleResultsCommand.Read.type, Seq[Battle]] {
-        case (BattleResultsCommand.Read, ctx, BattleResultsStatus(_, battles)) =>
+        case (BattleResultsCommand.Read, ctx, BattleResultsStatus(battles)) =>
           ctx.reply(battles)
       }.onCommand[BattleResultsCommand.Add, Battle.Id] {
         case (BattleResultsCommand.Add(battle), ctx, _) =>
@@ -55,6 +55,8 @@ object BattleResultsCommand {
   case class UpdateResults(battle: Battle.Id, results: Seq[BattleResultRequest.CompetitorResultPair])
     extends BattleResultsCommand
     with ReplyType[Done]
+
+  case class AddParticipant(participant: Player.Id) extends BattleResultsCommand with ReplyType[Done]
 }
 
 sealed trait BattleResultsEvent extends AggregateEvent[BattleResultsEvent] {
@@ -84,17 +86,12 @@ object BattleResultsEvent {
   }
 }
 
-case class BattleResultsStatus(battleHistories: Seq[Battle], battlesInProgress: Seq[Battle]) {
+case class BattleResultsStatus(battles: Seq[Battle]) {
   def updateBattle(battle: Battle): BattleResultsStatus = {
-    if (battle.competitors.exists(_.result.isEmpty)) {
-      copy(
-        battleHistories = battleHistories.filterNot(_.id == battle.id),
-        battlesInProgress = battlesInProgress.filterNot(_.id == battle.id) :+ battle)
-    } else {
-      copy(
-        battleHistories = battleHistories.filterNot(_.id == battle.id) :+ battle,
-        battlesInProgress = battlesInProgress.filterNot(_.id == battle.id))
-    }
+    copy(battles = battles.map {
+      case b if b.id == battle.id => battle
+      case b                      => b
+    })
   }
 }
 

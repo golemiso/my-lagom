@@ -1,6 +1,6 @@
 package controllers
 
-import com.golemiso.mylagom.aggregation.api.AggregationService
+import com.golemiso.mylagom.battle.api.BattleService
 import com.golemiso.mylagom.competition.api.{ CompetitionRequest, CompetitionService }
 import com.golemiso.mylagom.model.{ Competition, Player }
 import play.api.libs.json.Json
@@ -11,7 +11,7 @@ import scala.concurrent.ExecutionContext
 class CompetitionController(
   mcc: MessagesControllerComponents,
   service: CompetitionService,
-  aggregationService: AggregationService)(implicit ec: ExecutionContext)
+  battleService: BattleService)(implicit ec: ExecutionContext)
   extends MessagesAbstractController(mcc) {
 
   def get(id: Competition.Id): Action[AnyContent] = Action.async { _ =>
@@ -33,7 +33,7 @@ class CompetitionController(
   }
 
   def postParticipant(id: Competition.Id): Action[Player.Id] = Action.async(parse.json[Player.Id]) { request =>
-    service.addParticipant(id).invoke(request.body).map { _ =>
+    battleService.addParticipant(id).invoke(request.body).map { _ =>
       Created
     }
   }

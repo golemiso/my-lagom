@@ -54,11 +54,5 @@ class CompetitionServiceImpl(registry: PersistentEntityRegistry, system: ActorSy
       .runWith(Sink.seq)
   }
 
-  override def addParticipant(id: Competition.Id) = ServiceCall { participant =>
-    refFor(id).ask(CompetitionCommand.AddParticipant(participant)).map { _ =>
-      NotUsed
-    }
-  }
-
   private def refFor(id: Competition.Id) = registry.refFor[CompetitionEntity](id.id.toString)
 }

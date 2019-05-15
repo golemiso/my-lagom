@@ -42,8 +42,6 @@ object CompetitionCommand {
   case object Read extends CompetitionCommand with ReplyType[Option[Competition]] {
     implicit val format: Format[Read.type] = JsonSerializer.emptySingletonFormat(Read)
   }
-
-  case class AddParticipant(participant: Player.Id) extends CompetitionCommand with ReplyType[Done]
 }
 
 sealed trait CompetitionEvent

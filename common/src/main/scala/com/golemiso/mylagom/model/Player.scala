@@ -23,3 +23,13 @@ object Player {
     implicit val format: Format[Name] = Json.valueFormat
   }
 }
+
+case class PlayerScore(id: Player.Id, totalScore: PlayerScore.Score, scoresByMode: Map[String, PlayerScore.Score])
+object PlayerScore {
+  implicit val format: Format[PlayerScore] = Json.format
+
+  case class Score(score: Int = 0) extends AnyVal
+  object Score {
+    implicit val format: Format[Score] = Json.valueFormat
+  }
+}

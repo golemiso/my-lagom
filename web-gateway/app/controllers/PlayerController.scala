@@ -45,18 +45,3 @@ class PlayerController(mcc: MessagesControllerComponents, service: PlayerService
     }
   }
 }
-
-case class NewPlayerResource(name: String)
-object NewPlayerResource {
-  implicit val format: play.api.libs.json.Format[NewPlayerResource] = Json.format[NewPlayerResource]
-}
-
-case class PlayerResource(id: Player.Id, name: Player.Name)
-object PlayerResource {
-  implicit val format: play.api.libs.json.Format[PlayerResource] = Json.format[PlayerResource]
-  implicit def toEntity(playerResource: PlayerResource): domain.Player = {
-    domain.Player(domain.PlayerID(playerResource.id.id), playerResource.name.name)
-  }
-  implicit def fromEntity(player: domain.Player): PlayerResource =
-    PlayerResource(Player.Id(player.id.value), Player.Name(player.name))
-}

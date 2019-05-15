@@ -3,7 +3,7 @@ package com.golemiso.mylagom.battle.api
 import com.golemiso.mylagom.model._
 import play.api.libs.json.{ Format, Json }
 
-case class BattleRequest(mode: Battle.Mode, competitors: Seq[Battle.Competitor]) {
+case class BattleRequest(mode: Settings.Mode, competitors: Seq[Battle.Competitor]) {
   def apply(id: Battle.Id): Battle = Battle(id, mode, competitors)
 }
 object BattleRequest {
@@ -14,7 +14,7 @@ case class BattleResultRequest(id: Battle.Id, results: Seq[BattleResultRequest.C
 object BattleResultRequest {
   implicit val format: Format[BattleResultRequest] = Json.format
 
-  case class CompetitorResultPair(competitor: Battle.Competitor.Id, result: Result.Id)
+  case class CompetitorResultPair(competitor: Battle.Competitor.Id, result: Settings.Result.Id)
   object CompetitorResultPair {
     implicit val format: Format[CompetitorResultPair] = Json.format
   }

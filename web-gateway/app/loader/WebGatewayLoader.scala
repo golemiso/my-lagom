@@ -1,25 +1,14 @@
 package loader
 
-import com.golemiso.mylagom.aggregation.api.AggregationService
 import com.golemiso.mylagom.battle.api.BattleService
 import com.golemiso.mylagom.competition.api.CompetitionService
-import com.golemiso.mylagom.team.api.TeamService
 import com.golemiso.mylagom.player.api.PlayerService
 import com.lightbend.lagom.scaladsl.api.{ LagomConfigComponent, ServiceAcl, ServiceInfo }
 import com.lightbend.lagom.scaladsl.client.LagomServiceClientComponents
 import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
 import com.softwaremill.macwire._
 import com.typesafe.config.Config
-import controllers.{
-  AssetsComponents,
-  BattleController,
-  CompetitionController,
-  PlayerController,
-  RankingController,
-  TeamController
-}
-import domain.{ BattleRepository, PlayerRepository, TeamRepository }
-import infra.mongodb.{ MongoDBBattleRepository, MongoDBPlayerRepository, MongoDBTeamRepository }
+import controllers.{ AssetsComponents, BattleController, CompetitionController, PlayerController, RankingController }
 import play.api.ApplicationLoader.Context
 import play.api.http.FileMimeTypes
 import play.api.i18n._
@@ -31,7 +20,6 @@ import play.filters.HttpFiltersComponents
 import play.filters.cors.{ CORSConfig, CORSFilter }
 import reactivemongo.api.{ DefaultDB, MongoConnection, MongoDriver }
 import router.Routes
-import service.PlayerRecordService
 
 import scala.collection.immutable
 import scala.concurrent.{ ExecutionContext, Future }
@@ -58,25 +46,17 @@ abstract class WebGateway(context: Context)
   }
 
   lazy val playerService: PlayerService = serviceClient.implement[PlayerService]
-  lazy val teamService: TeamService = serviceClient.implement[TeamService]
   lazy val battleService: BattleService = serviceClient.implement[BattleService]
   lazy val competitionService: CompetitionService = serviceClient.implement[CompetitionService]
-  lazy val aggregationService: AggregationService = serviceClient.implement[AggregationService]
 
   lazy val messagesActionBuilder: MessagesActionBuilder = wire[WebGatewayMessagesActionBuilder]
   lazy val messagesControllerComponents: MessagesControllerComponents = wire[WebGatewayMessagesControllerComponents]
 
   lazy val playerController: PlayerController = wire[PlayerController]
-  lazy val playerRepository: PlayerRepository = wire[MongoDBPlayerRepository]
-
-  lazy val teamController: TeamController = wire[TeamController]
-  lazy val teamRepository: TeamRepository = wire[MongoDBTeamRepository]
 
   lazy val battleController: BattleController = wire[BattleController]
-  lazy val battleRepository: BattleRepository = wire[MongoDBBattleRepository]
 
   lazy val rankingController: RankingController = wire[RankingController]
-  lazy val playerRecordService: PlayerRecordService = wire[PlayerRecordService]
 
   lazy val competitionController: CompetitionController = wire[CompetitionController]
 
