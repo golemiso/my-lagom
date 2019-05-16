@@ -1,6 +1,6 @@
 package controllers
 
-import com.golemiso.mylagom.battle.api.BattleService
+import com.golemiso.mylagom.battle.api._
 import com.golemiso.mylagom.competition.api.{ CompetitionRequest, CompetitionService }
 import com.golemiso.mylagom.model.{ Competition, Player }
 import play.api.libs.json.Json
@@ -32,10 +32,28 @@ class CompetitionController(
     }
   }
 
+  def postMode(id: Competition.Id): Action[ModeRequest] = Action.async(parse.json[ModeRequest]) { request =>
+    battleService.addMode(id).invoke(request.body).map { id =>
+      Created(Json.toJson(id))
+    }
+  }
+
   def postParticipant(id: Competition.Id): Action[Player.Id] = Action.async(parse.json[Player.Id]) { request =>
     battleService.addParticipant(id).invoke(request.body).map { _ =>
       Created
     }
   }
 
+  def postGroupingPattern(id: Competition.Id): Action[GroupingPatternRequest] =
+    Action.async(parse.json[GroupingPatternRequest]) { request =>
+      battleService.addGroupingPattern(id).invoke(request.body).map { id =>
+        Created(Json.toJson(id))
+      }
+    }
+
+  def postResult(id: Competition.Id): Action[ResultRequest] = Action.async(parse.json[ResultRequest]) { request =>
+    battleService.addResult(id).invoke(request.body).map { id =>
+      Created(Json.toJson(id))
+    }
+  }
 }

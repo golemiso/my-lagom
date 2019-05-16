@@ -4,7 +4,7 @@ import java.util.UUID
 
 import play.api.libs.json._
 
-case class Battle(id: Battle.Id, mode: Settings.Mode, competitors: Seq[Battle.Competitor])
+case class Battle(id: Battle.Id, mode: Settings.Mode.Id, competitors: Seq[Battle.Competitor])
 object Battle {
   implicit val format: Format[Battle] = Json.format
 
@@ -28,22 +28,27 @@ case class Settings(
   modes: Seq[Settings.Mode] = Nil,
   participants: Seq[Player.Id] = Nil,
   groupingPatterns: Seq[Settings.GroupingPattern] = Nil,
-  resultPatterns: Seq[Settings.ResultPattern] = Nil)
+  results: Seq[Settings.Result] = Nil)
 object Settings {
   implicit val format: Format[Settings] = Json.format
 
-  case class Mode(value: String) extends AnyVal
+  case class Mode(id: Mode.Id, slug: Mode.Slug, name: Mode.Name)
   object Mode {
-    implicit val format: Format[Mode] = Json.valueFormat
-  }
-
-  case class ResultPattern(id: ResultPattern.Id, good: Result, bad: Result)
-  object ResultPattern {
-    implicit val format: Format[ResultPattern] = Json.format
+    implicit val format: Format[Mode] = Json.format
 
     case class Id(id: UUID) extends AnyVal
     object Id {
       implicit val format: Format[Id] = Json.valueFormat
+    }
+
+    case class Slug(slug: String) extends AnyVal
+    object Slug {
+      implicit val format: Format[Slug] = Json.valueFormat
+    }
+
+    case class Name(name: String) extends AnyVal
+    object Name {
+      implicit val format: Format[Name] = Json.valueFormat
     }
   }
 

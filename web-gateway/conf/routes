@@ -8,18 +8,26 @@
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
+# PlayerController
 GET     /players/:id                controllers.PlayerController.get(id: com.golemiso.mylagom.model.Player.Id)
-GET     /players/:id/detail         controllers.PlayerController.get(id: com.golemiso.mylagom.model.Player.Id)
-#GET     /players                    controllers.PlayerController.get(slug: com.golemiso.mylagom.model.PlayerSlug)
 GET     /players                    controllers.PlayerController.getAll
 POST    /players                    controllers.PlayerController.post()
 PUT     /players/:id                controllers.PlayerController.put(id: com.golemiso.mylagom.model.Player.Id)
 DELETE  /players/:id                controllers.PlayerController.delete(id: com.golemiso.mylagom.model.Player.Id)
 
-GET     /competitions               controllers.CompetitionController.getAll
-GET     /competitions/:id           controllers.CompetitionController.get(id: com.golemiso.mylagom.model.Competition.Id)
-POST    /competitions               controllers.CompetitionController.post()
-POST    /competitions/:id/participant               controllers.CompetitionController.postParticipant(id: com.golemiso.mylagom.model.Competition.Id)
+# CompetitionController
+GET     /competitions                                       controllers.CompetitionController.getAll
+GET     /competitions/:id                                   controllers.CompetitionController.get(id: com.golemiso.mylagom.model.Competition.Id)
+POST    /competitions                                       controllers.CompetitionController.post()
+POST    /competitions/:id/settings/modes                    controllers.CompetitionController.postMode(id: com.golemiso.mylagom.model.Competition.Id)
+POST    /competitions/:id/settings/participants             controllers.CompetitionController.postParticipant(id: com.golemiso.mylagom.model.Competition.Id)
+POST    /competitions/:id/settings/grouping-patterns        controllers.CompetitionController.postGroupingPattern(id: com.golemiso.mylagom.model.Competition.Id)
+POST    /competitions/:id/settings/results                  controllers.CompetitionController.postResult(id: com.golemiso.mylagom.model.Competition.Id)
+
+# BattleController
+GET     /competitions/:competitionId/battles                controllers.BattleController.getAll(competitionId: com.golemiso.mylagom.model.Competition.Id)
+POST    /competitions/:competitionId/battles                controllers.BattleController.post(competitionId: com.golemiso.mylagom.model.Competition.Id)
+PATCH   /competitions/:competitionId/battles/:id/results    controllers.BattleController.patchResults(competitionId: com.golemiso.mylagom.model.Competition.Id, id: com.golemiso.mylagom.model.Battle.Id)
 
 #GET     /battles/:id                controllers.BattleController.get(id: com.golemiso.mylagom.model.Battle.Id)
 #GET     /battles                    controllers.BattleController.getAll

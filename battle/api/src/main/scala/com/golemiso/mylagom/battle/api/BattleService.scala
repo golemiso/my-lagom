@@ -6,17 +6,17 @@ import com.lightbend.lagom.scaladsl.api.transport.Method
 import com.lightbend.lagom.scaladsl.api.{ Descriptor, Service, ServiceCall }
 
 trait BattleService extends Service {
-  def add(competitionId: Competition.Id): ServiceCall[BattleRequest, Battle.Id]
-  def readBattleHistories(competitionId: Competition.Id): ServiceCall[NotUsed, Seq[Battle]]
-  def readBattlesInProgress(competitionId: Competition.Id): ServiceCall[NotUsed, Seq[Battle]]
-  def delete(competitionId: Competition.Id, id: Battle.Id): ServiceCall[NotUsed, NotUsed]
+  def addBattle(competitionId: Competition.Id): ServiceCall[BattleRequest, Battle.Id]
+  def readAllBattles(competitionId: Competition.Id): ServiceCall[NotUsed, Seq[Battle]]
+  def deleteBattle(competitionId: Competition.Id, id: Battle.Id): ServiceCall[NotUsed, NotUsed]
 
-  def updateResults(competitionId: Competition.Id, id: Battle.Id): ServiceCall[BattleResultRequest, NotUsed]
+  def updateBattleResults(competitionId: Competition.Id, id: Battle.Id): ServiceCall[BattleResultsRequest, NotUsed]
 
-  def replaceModes(competitionId: Competition.Id): ServiceCall[Seq[Settings.Mode], NotUsed]
+  def addMode(competitionId: Competition.Id): ServiceCall[ModeRequest, Settings.Mode.Id]
   def addParticipant(competitionId: Competition.Id): ServiceCall[Player.Id, NotUsed]
-  def addGroupingPattern(competitionId: Competition.Id): ServiceCall[Settings.GroupingPattern, NotUsed]
-  def addResultPattern(competitionId: Competition.Id): ServiceCall[Settings.ResultPattern, NotUsed]
+  def addGroupingPattern(
+    competitionId: Competition.Id): ServiceCall[GroupingPatternRequest, Settings.GroupingPattern.Id]
+  def addResult(competitionId: Competition.Id): ServiceCall[ResultRequest, Settings.Result.Id]
 
   //  def events: Topic[BattleEvent]
 
@@ -24,15 +24,14 @@ trait BattleService extends Service {
     import Service._
     named("battles")
       .withCalls(
-        restCall(Method.POST, "/api/competitions/:competitionId/battles", add _),
-        restCall(Method.GET, "/api/competitions/:competitionId/battle-histories", readBattleHistories _),
-        restCall(Method.GET, "/api/competitions/:competitionId/battles-in-progress", readBattlesInProgress _),
-        restCall(Method.DELETE, "/api/competitions/:competitionId/battles/:id", delete _),
-        restCall(Method.PATCH, "/api/competitions/:competitionId/battles/:id/result", updateResults _),
-        restCall(Method.PUT, "/api/competitions/:competitionId/settings/modes", replaceModes _),
+        restCall(Method.POST, "/api/competitions/:competitionId/battles", addBattle _),
+        restCall(Method.GET, "/api/competitions/:competitionId/battles", readAllBattles _),
+        restCall(Method.DELETE, "/api/competitions/:competitionId/battles/:id", deleteBattle _),
+        restCall(Method.PATCH, "/api/competitions/:competitionId/battles/:id/result", updateBattleResults _),
+        restCall(Method.PUT, "/api/competitions/:competitionId/settings/modes", addMode _),
         restCall(Method.POST, "/api/competitions/:competitionId/settings/participants", addParticipant _),
         restCall(Method.POST, "/api/competitions/:competitionId/settings/grouping-pattern", addGroupingPattern _),
-        restCall(Method.POST, "/api/competitions/:competitionId/settings/result-pattern", addResultPattern _)
+        restCall(Method.POST, "/api/competitions/:competitionId/settings/result", addResult _)
       ).withAutoAcl(true)
     //      .withTopics(topic("BattleEvent", this.events))
   }

@@ -25,39 +25,45 @@ class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
   mat: Materializer)
   extends BattleService {
 
-  override def add(competitionId: Competition.Id) = ServiceCall { battle =>
+  override def addBattle(competitionId: Competition.Id) = ServiceCall { battle =>
     val id = Battle.Id(UUID.randomUUID())
-    refFor(competitionId: Competition.Id).ask(BattleResultsCommand.Add(battle(id)))
+    refFor(competitionId: Competition.Id).ask(BattleResultsCommand.AddBattle(battle(id)))
   }
 
-  override def readBattleHistories(competitionId: Competition.Id) = ServiceCall { _ =>
+  override def readAllBattles(competitionId: Competition.Id) = ServiceCall { _ =>
     refFor(competitionId).ask(BattleResultsCommand.Read)
   }
 
-  override def readBattlesInProgress(competitionId: Competition.Id) = ServiceCall { _ =>
-    refFor(competitionId).ask(BattleResultsCommand.Read)
-  }
-
-  override def delete(competitionId: Competition.Id, id: Battle.Id) = ServiceCall { _ =>
+  override def deleteBattle(competitionId: Competition.Id, id: Battle.Id) = ServiceCall { _ =>
     refFor(competitionId).ask(BattleResultsCommand.Delete).map { _ =>
       NotUsed
     }
   }
 
-  override def updateResults(competitionId: Competition.Id, id: Battle.Id) = ServiceCall { request =>
+  override def updateBattleResults(competitionId: Competition.Id, id: Battle.Id) = ServiceCall { request =>
     refFor(competitionId).ask(BattleResultsCommand.UpdateResults(request.id, request.results)).map { _ =>
       NotUsed
     }
   }
 
-  override def replaceModes(id: Competition.Id): ServiceCall[Seq[Settings.Mode], NotUsed] = ???
-  override def addGroupingPattern(id: Competition.Id): ServiceCall[Settings.GroupingPattern, NotUsed] = ???
-  override def addResultPattern(id: Competition.Id): ServiceCall[Settings.ResultPattern, NotUsed] = ???
+  override def addMode(competitionId: Competition.Id) = ServiceCall { mode =>
+    val id = Settings.Mode.Id(UUID.randomUUID())
+    refFor(competitionId: Competition.Id).ask(BattleResultsCommand.AddMode(mode(id)))
+  }
 
   override def addParticipant(id: Competition.Id) = ServiceCall { participant =>
     refFor(id).ask(BattleResultsCommand.AddParticipant(participant)).map { _ =>
       NotUsed
     }
+  }
+
+  override def addGroupingPattern(competitionId: Competition.Id) = ServiceCall { groupingPattern =>
+    val id = Settings.GroupingPattern.Id(UUID.randomUUID())
+    refFor(competitionId: Competition.Id).ask(BattleResultsCommand.AddGroupingPattern(groupingPattern(id)))
+  }
+  override def addResult(competitionId: Competition.Id) = ServiceCall { result =>
+    val id = Settings.Result.Id(UUID.randomUUID())
+    refFor(competitionId: Competition.Id).ask(BattleResultsCommand.AddResult(result(id)))
   }
 
   //  override def events: Topic[api.BattleEvent] = TopicProducer.singleStreamWithOffset { fromOffset =>

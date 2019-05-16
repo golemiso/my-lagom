@@ -3,7 +3,7 @@ package com.golemiso.mylagom.model
 import java.time.Instant
 import java.util.UUID
 
-import play.api.libs.json.{ Format, Json, Reads, Writes }
+import play.api.libs.json.{ Format, Json }
 
 case class Competition(
   id: Competition.Id,
