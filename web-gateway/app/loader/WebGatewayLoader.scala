@@ -7,7 +7,6 @@ import com.lightbend.lagom.scaladsl.api.{ LagomConfigComponent, ServiceAcl, Serv
 import com.lightbend.lagom.scaladsl.client.LagomServiceClientComponents
 import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
 import com.softwaremill.macwire._
-import com.typesafe.config.Config
 import controllers._
 import play.api.ApplicationLoader.Context
 import play.api.http.FileMimeTypes
@@ -18,15 +17,13 @@ import play.api.routing.Router
 import play.api.{ Application, ApplicationLoader, BuiltInComponentsFromContext, LoggerConfigurator }
 import play.filters.HttpFiltersComponents
 import play.filters.cors.{ CORSConfig, CORSFilter }
-import reactivemongo.api.{ DefaultDB, MongoConnection, MongoDriver }
 import router.Routes
 
 import scala.collection.immutable
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.ExecutionContext
 
 abstract class WebGateway(context: Context)
   extends BuiltInComponentsFromContext(context)
-  with DBComponents
   with AssetsComponents
   with I18nComponents
   with HttpFiltersComponents
@@ -85,23 +82,6 @@ class WebGatewayMessagesActionBuilder(parser: BodyParser[AnyContent], messagesAp
   with MessagesActionBuilder {
   def this(parser: BodyParsers.Default, messagesApi: MessagesApi)(implicit ec: ExecutionContext) = {
     this(parser: BodyParser[AnyContent], messagesApi)
-  }
-}
-
-trait DBComponents {
-  def config: Config
-  lazy val driver: MongoDriver = new MongoDriver(Some(config), None)
-  lazy val db: Future[DefaultDB] = {
-    import scala.concurrent.ExecutionContext.Implicits.global
-
-    val parsedUri = MongoConnection.parseURI(config.getString("mongodb.uri"))
-
-    for {
-      uri <- Future.fromTry(parsedUri)
-      con = driver.connection(uri)
-      dn <- Future(uri.db.get)
-      db <- con.database(dn)
-    } yield db
   }
 }
 

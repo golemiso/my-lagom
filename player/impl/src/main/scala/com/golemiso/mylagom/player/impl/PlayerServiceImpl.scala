@@ -31,22 +31,22 @@ class PlayerServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
     }
   }
 
-  override def read(id: Player.Id) = ServiceCall { _ =>
+  override def read(id: UUID) = ServiceCall { _ =>
     refFor(id).ask(PlayerCommand.Read).map {
       case Some(player) =>
         player
       case None =>
-        throw NotFound(s"Player with id ${id.id.toString}")
+        throw NotFound(s"Player with id ${id.toString}")
     }
   }
 
-  override def update(id: Player.Id) = ServiceCall { request =>
+  override def update(id: UUID) = ServiceCall { request =>
     refFor(id).ask(PlayerCommand.Update(request(id))).map { _ =>
       NotUsed
     }
   }
 
-  override def delete(id: Player.Id) = ServiceCall { _ =>
+  override def delete(id: UUID) = ServiceCall { _ =>
     refFor(id).ask(PlayerCommand.Delete).map { _ =>
       NotUsed
     }

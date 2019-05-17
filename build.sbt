@@ -5,7 +5,7 @@ version in ThisBuild := "1.0-SNAPSHOT"
 // the Scala version that will be used for cross-compiled libraries
 scalaVersion in ThisBuild := "2.12.4"
 
-val playJsonDerivedCodecs = "org.julienrf" %% "play-json-derived-codecs" % "5.0.0"
+val playJson = "com.typesafe.play" %% "play-json" % "2.7.2"
 val macwire = "com.softwaremill.macwire" %% "macros" % "2.3.0" % "provided"
 val scalaTest = "org.scalatest" %% "scalatest" % "3.0.4" % Test
 val scalaTestPlusPlay = "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
@@ -13,7 +13,7 @@ val scalaTestPlusPlay = "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.
 lazy val `common` = (project in file("common"))
   .settings(
     libraryDependencies ++= Seq(
-      playJsonDerivedCodecs
+      playJson
     )
   )
 
@@ -39,8 +39,7 @@ lazy val `player-impl` = (project in file("player/impl"))
 lazy val `battle-api` = (project in file("battle/api"))
   .settings(
     libraryDependencies ++= Seq(
-      lagomScaladslApi,
-      playJsonDerivedCodecs
+      lagomScaladslApi
     )
   )
   .dependsOn(`common`)
@@ -82,7 +81,6 @@ lazy val `web-gateway` = (project in file("web-gateway"))
     libraryDependencies ++= Seq(
       lagomScaladslServer,
       macwire,
-      "org.reactivemongo" %% "reactivemongo" % "0.13.0",
       scalaTestPlusPlay
     ),
     javaOptions in Test += "-Dconfig.file=test/resources/test.conf"

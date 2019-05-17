@@ -2,7 +2,6 @@ package com.golemiso.mylagom.competition.impl
 
 import java.util.UUID
 
-import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.persistence.cassandra.query.scaladsl.CassandraReadJournal
 import akka.persistence.query.PersistenceQuery
@@ -31,12 +30,12 @@ class CompetitionServiceImpl(registry: PersistentEntityRegistry, system: ActorSy
     }
   }
 
-  override def read(id: Competition.Id) = ServiceCall { _ =>
+  override def read(id: UUID) = ServiceCall { _ =>
     refFor(id).ask(CompetitionCommand.Read).map {
       case Some(competition) =>
         competition
       case None =>
-        throw NotFound(s"Competition with id ${id.id.toString}")
+        throw NotFound(s"Competition with id ${id.toString}")
     }
   }
 

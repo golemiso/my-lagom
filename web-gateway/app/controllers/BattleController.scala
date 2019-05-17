@@ -29,6 +29,8 @@ class BattleController(mcc: MessagesControllerComponents, service: BattleService
       } yield Ok
     }
 
-  def getNewGroups(competitionId: Competition.Id, rankBy: String): Action[Battle.Competitor] =
-    ???
+  def getNewGroups(competitionId: Competition.Id, mode: Settings.Mode.Id, rankBy: String): Action[AnyContent] =
+    Action.async { _ =>
+      scala.concurrent.Future(Ok)
+    }
 }

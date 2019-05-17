@@ -11,15 +11,19 @@ object Battle {
   case class Id(id: UUID) extends AnyVal
   object Id {
     implicit val format: Format[Id] = Json.valueFormat
+    implicit def anyValToUUID(id: Id): UUID = id.id
+    implicit def UUIDToAnyVal(id: UUID): Id = Id(id)
   }
 
-  case class Competitor(id: Competitor.Id, players: Seq[Player.Id], result: Option[Settings.Result.Id])
+  case class Competitor(id: Competitor.Id, players: Seq[Player.Id], result: Option[Settings.Result.Id] = None)
   object Competitor {
     implicit val format: Format[Competitor] = Json.format
 
     case class Id(id: UUID) extends AnyVal
     object Id {
       implicit val format: Format[Id] = Json.valueFormat
+      implicit def anyValToUUID(id: Id): UUID = id.id
+      implicit def UUIDToAnyVal(id: UUID): Id = Id(id)
     }
   }
 }
@@ -39,6 +43,8 @@ object Settings {
     case class Id(id: UUID) extends AnyVal
     object Id {
       implicit val format: Format[Id] = Json.valueFormat
+      implicit def anyValToUUID(id: Id): UUID = id.id
+      implicit def UUIDToAnyVal(id: UUID): Id = Id(id)
     }
 
     case class Slug(slug: String) extends AnyVal

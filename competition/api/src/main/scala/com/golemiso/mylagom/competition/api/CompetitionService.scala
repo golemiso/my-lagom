@@ -1,5 +1,7 @@
 package com.golemiso.mylagom.competition.api
 
+import java.util.UUID
+
 import akka.NotUsed
 import com.golemiso.mylagom.model._
 import com.lightbend.lagom.scaladsl.api.transport.Method
@@ -8,7 +10,7 @@ import com.lightbend.lagom.scaladsl.api.{ Descriptor, Service, ServiceCall }
 trait CompetitionService extends Service {
 
   def create(): ServiceCall[CompetitionRequest, Competition.Id]
-  def read(id: Competition.Id): ServiceCall[NotUsed, Competition]
+  def read(id: UUID): ServiceCall[NotUsed, Competition]
 
   def readAll: ServiceCall[NotUsed, Seq[Competition]]
 

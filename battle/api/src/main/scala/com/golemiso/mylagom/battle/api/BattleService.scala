@@ -1,22 +1,25 @@
 package com.golemiso.mylagom.battle.api
 
+import java.util.UUID
+
 import akka.NotUsed
 import com.golemiso.mylagom.model._
 import com.lightbend.lagom.scaladsl.api.transport.Method
 import com.lightbend.lagom.scaladsl.api.{ Descriptor, Service, ServiceCall }
 
 trait BattleService extends Service {
-  def addBattle(competitionId: Competition.Id): ServiceCall[BattleRequest, Battle.Id]
-  def readAllBattles(competitionId: Competition.Id): ServiceCall[NotUsed, Seq[Battle]]
-  def deleteBattle(competitionId: Competition.Id, id: Battle.Id): ServiceCall[NotUsed, NotUsed]
+  def addBattle(competitionId: UUID): ServiceCall[BattleRequest, Battle.Id]
+  def readAllBattles(competitionId: UUID): ServiceCall[NotUsed, Seq[Battle]]
+  def deleteBattle(competitionId: UUID, id: UUID): ServiceCall[NotUsed, NotUsed]
 
-  def updateBattleResults(competitionId: Competition.Id, id: Battle.Id): ServiceCall[BattleResultsRequest, NotUsed]
+  def updateBattleResults(competitionId: UUID, id: UUID): ServiceCall[BattleResultsRequest, NotUsed]
 
-  def addMode(competitionId: Competition.Id): ServiceCall[ModeRequest, Settings.Mode.Id]
-  def addParticipant(competitionId: Competition.Id): ServiceCall[Player.Id, NotUsed]
-  def addGroupingPattern(
-    competitionId: Competition.Id): ServiceCall[GroupingPatternRequest, Settings.GroupingPattern.Id]
-  def addResult(competitionId: Competition.Id): ServiceCall[ResultRequest, Settings.Result.Id]
+  def addMode(competitionId: UUID): ServiceCall[ModeRequest, Settings.Mode.Id]
+  def addParticipant(competitionId: UUID): ServiceCall[Player.Id, NotUsed]
+  def addGroupingPattern(competitionId: UUID): ServiceCall[GroupingPatternRequest, Settings.GroupingPattern.Id]
+  def addResult(competitionId: UUID): ServiceCall[ResultRequest, Settings.Result.Id]
+
+  def getNewGroups(competitionId: UUID, modeId: UUID, rankBy: String): ServiceCall[NotUsed, Seq[Battle.Competitor]]
 
   //  def events: Topic[BattleEvent]
 

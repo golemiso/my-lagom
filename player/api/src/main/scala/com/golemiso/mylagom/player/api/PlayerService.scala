@@ -1,5 +1,7 @@
 package com.golemiso.mylagom.player.api
 
+import java.util.UUID
+
 import akka.NotUsed
 import com.golemiso.mylagom.model.Player
 import com.lightbend.lagom.scaladsl.api.transport.Method
@@ -7,9 +9,9 @@ import com.lightbend.lagom.scaladsl.api.{ Descriptor, Service, ServiceCall }
 
 trait PlayerService extends Service {
   def create(): ServiceCall[PlayerRequest, Player.Id]
-  def read(id: Player.Id): ServiceCall[NotUsed, Player]
-  def update(id: Player.Id): ServiceCall[PlayerRequest, NotUsed]
-  def delete(id: Player.Id): ServiceCall[NotUsed, NotUsed]
+  def read(id: UUID): ServiceCall[NotUsed, Player]
+  def update(id: UUID): ServiceCall[PlayerRequest, NotUsed]
+  def delete(id: UUID): ServiceCall[NotUsed, NotUsed]
 
   def readAll: ServiceCall[NotUsed, Seq[Player]]
 

@@ -11,6 +11,8 @@ object Player {
   case class Id(id: UUID) extends AnyVal
   object Id {
     implicit val format: Format[Id] = Json.valueFormat
+    implicit def anyValToUUID(id: Id): UUID = id.id
+    implicit def UUIDToAnyVal(id: UUID): Id = Id(id)
   }
 
   case class Slug(slug: String) extends AnyVal

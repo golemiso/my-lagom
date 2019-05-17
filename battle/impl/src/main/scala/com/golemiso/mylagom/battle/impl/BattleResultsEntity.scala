@@ -15,6 +15,8 @@ import com.lightbend.lagom.scaladsl.playjson.{ JsonSerializer, JsonSerializerReg
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity.ReplyType
 import play.api.libs.json.{ Format, Json }
 
+import scala.util.Random
+
 class BattleResultsEntity(registry: PersistentEntityRegistry) extends PersistentEntity {
   override type Command = BattleResultsCommand
   override type Event = BattleResultsEvent
@@ -23,17 +25,20 @@ class BattleResultsEntity(registry: PersistentEntityRegistry) extends Persistent
 
   override def behavior: Behavior = { _ =>
     Actions()
-      .onReadOnlyCommand[BattleResultsCommand.Read.type, Seq[Battle]] {
-        case (BattleResultsCommand.Read, ctx, state) =>
+      .onReadOnlyCommand[BattleResultsCommand.ReadBattles.type, Seq[Battle]] {
+        case (BattleResultsCommand.ReadBattles, ctx, state) =>
           ctx.reply(state.battles)
+      }.onReadOnlyCommand[BattleResultsCommand.GetNewGroups, Seq[Seq[Player.Id]]] {
+        case (BattleResultsCommand.GetNewGroups(mode, rankBy), ctx, state) =>
+          ctx.reply(newGroups(state, mode, rankBy))
       }.onCommand[BattleResultsCommand.AddBattle, Battle.Id] {
         case (BattleResultsCommand.AddBattle(battle), ctx, _) =>
           ctx.thenPersist(BattleResultsEvent.BattleAdded(battle))(_ => ctx.reply(battle.id))
       }.onCommand[BattleResultsCommand.UpdateResults, Done] {
         case (BattleResultsCommand.UpdateResults(battle, results), ctx, _) =>
           ctx.thenPersist(BattleResultsEvent.ResultUpdated(battle, results))(_ => ctx.reply(Done))
-      }.onCommand[BattleResultsCommand.Delete.type, Done] {
-        case (BattleResultsCommand.Delete, ctx, _) =>
+      }.onCommand[BattleResultsCommand.DeleteBattle.type, Done] {
+        case (BattleResultsCommand.DeleteBattle, ctx, _) =>
           ctx.thenPersist(BattleResultsEvent.Deleted)(_ => ctx.reply(Done))
       }.onCommand[BattleResultsCommand.AddMode, Settings.Mode.Id] {
         case (BattleResultsCommand.AddMode(mode), ctx, _) =>
@@ -64,15 +69,54 @@ class BattleResultsEntity(registry: PersistentEntityRegistry) extends Persistent
       }
   }
 
-  def id = Competition.Id(UUID.fromString(entityId))
+  private def id = Competition.Id(UUID.fromString(entityId))
+
+  private def newGroups(state: State, mode: Settings.Mode.Id, rankBy: Settings.GroupingPattern.RankBy) = {
+
+    val allRankings = createRankings(state)
+    val groupingPattern = Random.shuffle(state.settings.groupingPatterns).head
+
+    val baseRanking = rankBy match {
+      case Settings.GroupingPattern.RankBy.AllResult =>
+        allRankings.totalRanking
+      case Settings.GroupingPattern.RankBy.ModeResult =>
+        allRankings.rankingsByMode.find(_.mode == mode).map(_.rankings).get
+      case Settings.GroupingPattern.RankBy.Unknown =>
+        throw new Exception
+    }
+
+    if (baseRanking.length != groupingPattern.groups.flatMap(_.MemberRankings).length) throw new Exception
+
+    val rankingsWithoutTies =
+      Random.shuffle(baseRanking).sorted(Ordering.by((_: PlayerRanking).ranking.ranking).reverse)
+
+    groupingPattern.groups.map(_.MemberRankings.map(r => rankingsWithoutTies(r.ranking - 1).player))
+  }
+
+  private def createRankings(state: State) = {
+
+    def ranking(tuple: Seq[(Player.Id, Int)]) = {
+      tuple.map(t1 => PlayerRanking(t1._1, PlayerRanking.Ranking(tuple.count(t2 => t1._2 > t2._2) + 1)))
+    }
+
+    PlayerRankings(
+      ranking(state.playerBattleResults.map(pbr => (pbr.id, pbr.score.totalScore.score))),
+      state.settings.modes.map { m =>
+        PlayerRankings.RankingsByMode(
+          m.id,
+          ranking(state.playerBattleResults.map(pbr =>
+            (pbr.id, pbr.score.scoresByMode.find(_.mode == m.id).map(_.score.score).getOrElse(0)))))
+      }
+    )
+  }
 }
 
 sealed trait BattleResultsCommand
 object BattleResultsCommand {
   case class Create() extends BattleResultsCommand with ReplyType[Done]
   case class AddBattle(battle: Battle) extends BattleResultsCommand with ReplyType[Battle.Id]
-  case object Read extends BattleResultsCommand with ReplyType[Seq[Battle]]
-  case object Delete extends BattleResultsCommand with ReplyType[Done]
+  case object ReadBattles extends BattleResultsCommand with ReplyType[Seq[Battle]]
+  case object DeleteBattle extends BattleResultsCommand with ReplyType[Done]
 
   case class UpdateResults(battle: Battle.Id, results: Seq[BattleResultsRequest.CompetitorResultPair])
     extends BattleResultsCommand
@@ -84,6 +128,10 @@ object BattleResultsCommand {
     extends BattleResultsCommand
     with ReplyType[Settings.GroupingPattern.Id]
   case class AddResult(result: Settings.Result) extends BattleResultsCommand with ReplyType[Settings.Result.Id]
+
+  case class GetNewGroups(mode: Settings.Mode.Id, rankBy: Settings.GroupingPattern.RankBy)
+    extends BattleResultsCommand
+    with ReplyType[Seq[Seq[Player.Id]]]
 }
 
 sealed trait BattleResultsEvent extends AggregateEvent[BattleResultsEvent] {
@@ -183,7 +231,7 @@ object PlayerScore {
   def apply(scoresByMode: Seq[PlayerScore.ScoresByMode]): PlayerScore =
     PlayerScore(Score(scoresByMode.map(_.score.score).sum), scoresByMode)
 
-  case class Score(score: Int = 0) extends AnyVal
+  case class Score(score: Int) extends AnyVal
   object Score {
     implicit val format: Format[Score] = Json.valueFormat
   }
@@ -191,6 +239,26 @@ object PlayerScore {
   case class ScoresByMode(mode: Settings.Mode.Id, score: Score)
   object ScoresByMode {
     implicit val format: Format[ScoresByMode] = Json.format
+  }
+}
+
+case class PlayerRankings(totalRanking: Seq[PlayerRanking], rankingsByMode: Seq[PlayerRankings.RankingsByMode])
+object PlayerRankings {
+  implicit val format: Format[PlayerRankings] = Json.format
+
+  case class RankingsByMode(mode: Settings.Mode.Id, rankings: Seq[PlayerRanking])
+  object RankingsByMode {
+    implicit val format: Format[RankingsByMode] = Json.format
+  }
+}
+
+case class PlayerRanking(player: Player.Id, ranking: PlayerRanking.Ranking)
+object PlayerRanking {
+  implicit val format: Format[PlayerRanking] = Json.format
+
+  case class Ranking(ranking: Int) extends AnyVal
+  object Ranking {
+    implicit val format: Format[Ranking] = Json.valueFormat
   }
 }
 
