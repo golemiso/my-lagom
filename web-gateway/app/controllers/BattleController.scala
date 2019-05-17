@@ -1,20 +1,14 @@
 package controllers
 
 import com.golemiso.mylagom.battle.api._
-import com.golemiso.mylagom.competition.api.CompetitionService
 import com.golemiso.mylagom.model._
 import play.api.libs.json.Json
 import play.api.mvc._
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.ExecutionContext
 
-class BattleController(
-  mcc: MessagesControllerComponents,
-  service: BattleService,
-  competitionService: CompetitionService)(implicit ec: ExecutionContext)
+class BattleController(mcc: MessagesControllerComponents, service: BattleService)(implicit ec: ExecutionContext)
   extends MessagesAbstractController(mcc) {
-
-  private def fetchCompetition(id: Competition.Id): Future[Competition] = competitionService.read(id).invoke
 
   def getAll(competitionId: Competition.Id): Action[AnyContent] = Action.async { _ =>
     for {
@@ -34,4 +28,7 @@ class BattleController(
         _ <- service.updateBattleResults(competitionId, id).invoke(request.body)
       } yield Ok
     }
+
+  def getNewGroups(competitionId: Competition.Id, rankBy: String): Action[Battle.Competitor] =
+    ???
 }

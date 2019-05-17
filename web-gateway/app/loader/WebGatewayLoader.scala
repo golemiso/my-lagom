@@ -8,7 +8,7 @@ import com.lightbend.lagom.scaladsl.client.LagomServiceClientComponents
 import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
 import com.softwaremill.macwire._
 import com.typesafe.config.Config
-import controllers.{ AssetsComponents, BattleController, CompetitionController, PlayerController, RankingController }
+import controllers._
 import play.api.ApplicationLoader.Context
 import play.api.http.FileMimeTypes
 import play.api.i18n._
@@ -59,6 +59,8 @@ abstract class WebGateway(context: Context)
   lazy val rankingController: RankingController = wire[RankingController]
 
   lazy val competitionController: CompetitionController = wire[CompetitionController]
+
+  lazy val settingController: SettingController = wire[SettingController]
 
   lazy val router: Router = {
     // add the prefix string in local scope for the Routes constructor

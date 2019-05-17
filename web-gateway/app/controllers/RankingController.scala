@@ -1,7 +1,5 @@
 package controllers
 
-import com.golemiso.mylagom.model.Competition
-import play.api.libs.json.{ Json, OFormat }
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
