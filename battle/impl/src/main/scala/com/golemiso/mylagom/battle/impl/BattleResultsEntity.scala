@@ -77,9 +77,9 @@ class BattleResultsEntity(registry: PersistentEntityRegistry) extends Persistent
     val groupingPattern = Random.shuffle(state.settings.groupingPatterns).head
 
     val baseRanking = rankBy match {
-      case Settings.GroupingPattern.RankBy.AllResult =>
+      case Settings.GroupingPattern.RankBy.EntireScores =>
         allRankings.totalRanking
-      case Settings.GroupingPattern.RankBy.ModeResult =>
+      case Settings.GroupingPattern.RankBy.ModeScores =>
         allRankings.rankingsByMode.find(_.mode == mode).map(_.rankings).get
       case Settings.GroupingPattern.RankBy.Unknown =>
         throw new Exception

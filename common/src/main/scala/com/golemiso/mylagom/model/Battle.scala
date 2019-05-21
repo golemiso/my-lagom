@@ -113,10 +113,10 @@ object Settings {
 
     sealed abstract class RankBy(val value: String)
     object RankBy {
-      case object ModeResult extends RankBy("mode_result")
-      case object AllResult extends RankBy("all_result")
+      case object ModeScores extends RankBy("mode_scores")
+      case object EntireScores extends RankBy("entire_scores")
       case object Unknown extends RankBy("unknown")
-      val all: Seq[RankBy] = ModeResult :: AllResult :: Nil
+      val all: Seq[RankBy] = ModeScores :: EntireScores :: Nil
       def apply(value: String): RankBy = all.find(_.value == value).getOrElse(Unknown)
       def unapply(mode: RankBy): Option[String] = Some(mode.value)
 

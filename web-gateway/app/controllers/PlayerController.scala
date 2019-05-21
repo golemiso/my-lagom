@@ -35,7 +35,7 @@ class PlayerController(mcc: MessagesControllerComponents, service: PlayerService
 
   def post(): Action[PlayerRequest] = Action.async(parse.json[PlayerRequest]) { request =>
     service.create().invoke(request.body).map { id =>
-      Created(Json.toJson(id))
+      Created(Json.toJson(id)(Json.format))
     }
   }
 

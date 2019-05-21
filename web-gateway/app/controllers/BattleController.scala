@@ -18,8 +18,8 @@ class BattleController(mcc: MessagesControllerComponents, service: BattleService
 
   def post(competitionId: Competition.Id): Action[BattleRequest] = Action.async(parse.json[BattleRequest]) { request =>
     for {
-      _ <- service.addBattle(competitionId).invoke(request.body)
-    } yield Ok
+      id <- service.addBattle(competitionId).invoke(request.body)
+    } yield Ok(Json.toJson(id)(Json.format))
   }
 
   def patchResults(competitionId: Competition.Id, id: Battle.Id): Action[BattleResultsRequest] =
@@ -31,6 +31,8 @@ class BattleController(mcc: MessagesControllerComponents, service: BattleService
 
   def getNewGroups(competitionId: Competition.Id, mode: Settings.Mode.Id, rankBy: String): Action[AnyContent] =
     Action.async { _ =>
-      scala.concurrent.Future(Ok)
+      for {
+        competitors <- service.getNewGroups(competitionId, mode, rankBy).invoke
+      } yield Ok(Json.toJson(competitors))
     }
 }

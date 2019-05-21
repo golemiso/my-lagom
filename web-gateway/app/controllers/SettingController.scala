@@ -12,7 +12,7 @@ class SettingController(mcc: MessagesControllerComponents, battleService: Battle
 
   def postMode(competitionId: Competition.Id): Action[ModeRequest] = Action.async(parse.json[ModeRequest]) { request =>
     battleService.addMode(competitionId).invoke(request.body).map { id =>
-      Created(Json.toJson(id))
+      Created(Json.toJson(id)(Json.format))
     }
   }
 
@@ -26,14 +26,14 @@ class SettingController(mcc: MessagesControllerComponents, battleService: Battle
   def postGroupingPattern(competitionId: Competition.Id): Action[GroupingPatternRequest] =
     Action.async(parse.json[GroupingPatternRequest]) { request =>
       battleService.addGroupingPattern(competitionId).invoke(request.body).map { id =>
-        Created(Json.toJson(id))
+        Created(Json.toJson(id)(Json.format))
       }
     }
 
   def postResult(competitionId: Competition.Id): Action[ResultRequest] = Action.async(parse.json[ResultRequest]) {
     request =>
       battleService.addResult(competitionId).invoke(request.body).map { id =>
-        Created(Json.toJson(id))
+        Created(Json.toJson(id)(Json.format))
       }
   }
 }

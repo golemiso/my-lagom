@@ -28,7 +28,7 @@ class CompetitionController(
 
   def post(): Action[CompetitionRequest] = Action.async(parse.json[CompetitionRequest]) { request =>
     service.create().invoke(request.body).map { id =>
-      Created(Json.toJson(id))
+      Created(Json.toJson(id)(Json.format))
     }
   }
 }
