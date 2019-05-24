@@ -1,9 +1,9 @@
 package controllers
 
 import com.golemiso.mylagom.battle.api._
-import com.golemiso.mylagom.model.{ Competition, Player }
+import com.golemiso.mylagom.model.{Competition, Player}
 import play.api.libs.json.Json
-import play.api.mvc.{ Action, MessagesAbstractController, MessagesControllerComponents }
+import play.api.mvc.{Action, AnyContent, MessagesAbstractController, MessagesControllerComponents}
 
 import scala.concurrent.ExecutionContext
 
@@ -16,7 +16,11 @@ class SettingController(mcc: MessagesControllerComponents, battleService: Battle
     }
   }
 
-  def postParticipant(competitionId: Competition.Id): Action[Player.Id] = Action.async(parse.json[Player.Id]) {
+  def getModes(competitionId: Competition.Id): Action[AnyContent] = Action.async { _ =>
+    battleService.getModes
+  }
+
+  def postParticipant(competitionId: Competition.Id): Action[Player.Id] = Action.async(parse.json[Player.Id](Json.format)) {
     request =>
       battleService.addParticipant(competitionId).invoke(request.body).map { _ =>
         Created

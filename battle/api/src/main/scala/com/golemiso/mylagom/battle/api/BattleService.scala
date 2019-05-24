@@ -15,6 +15,7 @@ trait BattleService extends Service {
   def updateBattleResults(competitionId: UUID, id: UUID): ServiceCall[BattleResultsRequest, NotUsed]
 
   def addMode(competitionId: UUID): ServiceCall[ModeRequest, Settings.Mode.Id]
+  def readMode(competitionId: UUID): ServiceCall[ModeRequest, Settings.Mode.Id]
   def addParticipant(competitionId: UUID): ServiceCall[Player.Id, NotUsed]
   def addGroupingPattern(competitionId: UUID): ServiceCall[GroupingPatternRequest, Settings.GroupingPattern.Id]
   def addResult(competitionId: UUID): ServiceCall[ResultRequest, Settings.Result.Id]

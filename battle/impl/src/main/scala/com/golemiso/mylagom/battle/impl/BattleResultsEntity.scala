@@ -267,6 +267,10 @@ object BattleSerializerRegistry extends JsonSerializerRegistry {
     List(
       JsonSerializer[BattleResultsStatus],
       JsonSerializer[BattleResultsEvent.Deleted.type],
-      JsonSerializer[BattleResultsEvent.ResultUpdated]
+      JsonSerializer[BattleResultsEvent.ResultUpdated],
+      JsonSerializer[BattleResultsEvent.ModeAdded],
+      JsonSerializer[BattleResultsEvent.ParticipantAdded],
+      JsonSerializer[BattleResultsEvent.GroupingPatternAdded],
+      JsonSerializer[BattleResultsEvent.ResultAdded]
     )
 }

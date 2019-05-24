@@ -22,6 +22,7 @@ POST    /competitions                                       controllers.Competit
 
 # Setting API
 POST    /competitions/:id/settings/modes                    controllers.SettingController.postMode(id: com.golemiso.mylagom.model.Competition.Id)
+GET     /competitions/:id/settings/modes                    controllers.SettingController.getModes(id: com.golemiso.mylagom.model.Competition.Id)
 POST    /competitions/:id/settings/participants             controllers.SettingController.postParticipant(id: com.golemiso.mylagom.model.Competition.Id)
 POST    /competitions/:id/settings/grouping-patterns        controllers.SettingController.postGroupingPattern(id: com.golemiso.mylagom.model.Competition.Id)
 POST    /competitions/:id/settings/results                  controllers.SettingController.postResult(id: com.golemiso.mylagom.model.Competition.Id)
