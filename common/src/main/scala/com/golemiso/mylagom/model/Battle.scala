@@ -96,14 +96,9 @@ object Settings {
       implicit val format: Format[Name] = Json.valueFormat
     }
 
-    case class Group(number: Group.Number, MemberRankings: Seq[Group.Ranking])
+    case class Group(memberRankings: Seq[Group.Ranking])
     object Group {
       implicit val format: Format[Group] = Json.format
-
-      case class Number(number: Int) extends AnyVal
-      object Number {
-        implicit val format: Format[Number] = Json.valueFormat
-      }
 
       case class Ranking(ranking: Int) extends AnyVal
       object Ranking {

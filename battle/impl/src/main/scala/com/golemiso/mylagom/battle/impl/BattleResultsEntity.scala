@@ -4,6 +4,7 @@ import java.util.UUID
 
 import akka.Done
 import com.golemiso.mylagom.battle.api.BattleResultsRequest
+import com.golemiso.mylagom.model.Settings.GroupingPattern
 import com.golemiso.mylagom.model._
 import com.lightbend.lagom.scaladsl.persistence.{
   AggregateEvent,
@@ -29,8 +30,8 @@ class BattleResultsEntity(registry: PersistentEntityRegistry) extends Persistent
         case (BattleResultsCommand.ReadBattles, ctx, state) =>
           ctx.reply(state.battles)
       }.onReadOnlyCommand[BattleResultsCommand.GetNewGroups, Seq[Seq[Player.Id]]] {
-        case (BattleResultsCommand.GetNewGroups(mode, rankBy), ctx, state) =>
-          ctx.reply(newGroups(state, mode, rankBy))
+        case (BattleResultsCommand.GetNewGroups(mode, groupingPattern), ctx, state) =>
+          ctx.reply(newGroups(state, mode, groupingPattern))
       }.onCommand[BattleResultsCommand.AddBattle, Battle.Id] {
         case (BattleResultsCommand.AddBattle(battle), ctx, _) =>
           ctx.thenPersist(BattleResultsEvent.BattleAdded(battle))(_ => ctx.reply(battle.id))
@@ -40,12 +41,21 @@ class BattleResultsEntity(registry: PersistentEntityRegistry) extends Persistent
       }.onCommand[BattleResultsCommand.DeleteBattle.type, Done] {
         case (BattleResultsCommand.DeleteBattle, ctx, _) =>
           ctx.thenPersist(BattleResultsEvent.Deleted)(_ => ctx.reply(Done))
+      }.onReadOnlyCommand[BattleResultsCommand.ReadSettings.type, Settings] {
+        case (BattleResultsCommand.ReadSettings, ctx, state) =>
+          ctx.reply(state.settings)
       }.onCommand[BattleResultsCommand.AddMode, Settings.Mode.Id] {
         case (BattleResultsCommand.AddMode(mode), ctx, _) =>
           ctx.thenPersist(BattleResultsEvent.ModeAdded(mode))(_ => ctx.reply(mode.id))
+      }.onCommand[BattleResultsCommand.RemoveMode, Done] {
+        case (BattleResultsCommand.RemoveMode(mode), ctx, _) =>
+          ctx.thenPersist(BattleResultsEvent.ModeRemoved(mode))(_ => ctx.reply(Done))
       }.onCommand[BattleResultsCommand.AddParticipant, Done] {
         case (BattleResultsCommand.AddParticipant(participant), ctx, _) =>
           ctx.thenPersist(BattleResultsEvent.ParticipantAdded(participant))(_ => ctx.reply(Done))
+      }.onCommand[BattleResultsCommand.RemoveParticipant, Done] {
+        case (BattleResultsCommand.RemoveParticipant(participant), ctx, _) =>
+          ctx.thenPersist(BattleResultsEvent.ParticipantRemoved(participant))(_ => ctx.reply(Done))
       }.onCommand[BattleResultsCommand.AddGroupingPattern, Settings.GroupingPattern.Id] {
         case (BattleResultsCommand.AddGroupingPattern(groupingPattern), ctx, _) =>
           ctx.thenPersist(BattleResultsEvent.GroupingPatternAdded(groupingPattern))(_ => ctx.reply(groupingPattern.id))
@@ -59,8 +69,13 @@ class BattleResultsEntity(registry: PersistentEntityRegistry) extends Persistent
           state.updateBattle(battle)
         case (BattleResultsEvent.ModeAdded(mode), state) =>
           state.copy(settings = state.settings.copy(modes = state.settings.modes :+ mode))
+        case (BattleResultsEvent.ModeRemoved(mode), state) =>
+          state.copy(settings = state.settings.copy(modes = state.settings.modes.filterNot(_.id == mode)))
         case (BattleResultsEvent.ParticipantAdded(participant), state) =>
           state.copy(settings = state.settings.copy(participants = state.settings.participants :+ participant))
+        case (BattleResultsEvent.ParticipantRemoved(participant), state) =>
+          state.copy(
+            settings = state.settings.copy(participants = state.settings.participants.filterNot(_ == participant)))
         case (BattleResultsEvent.GroupingPatternAdded(groupingPattern), state) =>
           state.copy(
             settings = state.settings.copy(groupingPatterns = state.settings.groupingPatterns :+ groupingPattern))
@@ -71,12 +86,15 @@ class BattleResultsEntity(registry: PersistentEntityRegistry) extends Persistent
 
   private def id = Competition.Id(UUID.fromString(entityId))
 
-  private def newGroups(state: State, mode: Settings.Mode.Id, rankBy: Settings.GroupingPattern.RankBy) = {
+  private def newGroups(state: State, mode: Settings.Mode.Id, groupingPattern: Option[Settings.GroupingPattern.Id]) = {
 
     val allRankings = createRankings(state)
-    val groupingPattern = Random.shuffle(state.settings.groupingPatterns).head
 
-    val baseRanking = rankBy match {
+    val gp = groupingPattern
+      .flatMap(id => state.settings.groupingPatterns.find(_.id == id)).getOrElse(
+        Random.shuffle(state.settings.groupingPatterns).head)
+
+    val baseRanking = gp.rankBy match {
       case Settings.GroupingPattern.RankBy.EntireScores =>
         allRankings.totalRanking
       case Settings.GroupingPattern.RankBy.ModeScores =>
@@ -85,12 +103,12 @@ class BattleResultsEntity(registry: PersistentEntityRegistry) extends Persistent
         throw new Exception
     }
 
-    if (baseRanking.length != groupingPattern.groups.flatMap(_.MemberRankings).length) throw new Exception
+    if (baseRanking.length != gp.groups.flatMap(_.memberRankings).length) throw new Exception
 
     val rankingsWithoutTies =
       Random.shuffle(baseRanking).sorted(Ordering.by((_: PlayerRanking).ranking.ranking).reverse)
 
-    groupingPattern.groups.map(_.MemberRankings.map(r => rankingsWithoutTies(r.ranking - 1).player))
+    gp.groups.map(_.memberRankings.map(r => rankingsWithoutTies(r.ranking - 1).player))
   }
 
   private def createRankings(state: State) = {
@@ -122,14 +140,17 @@ object BattleResultsCommand {
     extends BattleResultsCommand
     with ReplyType[Done]
 
+  case object ReadSettings extends BattleResultsCommand with ReplyType[Settings]
   case class AddMode(mode: Settings.Mode) extends BattleResultsCommand with ReplyType[Settings.Mode.Id]
+  case class RemoveMode(mode: Settings.Mode.Id) extends BattleResultsCommand with ReplyType[Done]
   case class AddParticipant(participant: Player.Id) extends BattleResultsCommand with ReplyType[Done]
+  case class RemoveParticipant(participant: Player.Id) extends BattleResultsCommand with ReplyType[Done]
   case class AddGroupingPattern(groupingPattern: Settings.GroupingPattern)
     extends BattleResultsCommand
     with ReplyType[Settings.GroupingPattern.Id]
   case class AddResult(result: Settings.Result) extends BattleResultsCommand with ReplyType[Settings.Result.Id]
 
-  case class GetNewGroups(mode: Settings.Mode.Id, rankBy: Settings.GroupingPattern.RankBy)
+  case class GetNewGroups(mode: Settings.Mode.Id, groupingPattern: Option[Settings.GroupingPattern.Id])
     extends BattleResultsCommand
     with ReplyType[Seq[Seq[Player.Id]]]
 }
@@ -165,9 +186,19 @@ object BattleResultsEvent {
     implicit val format: Format[ModeAdded] = Json.format
   }
 
+  case class ModeRemoved(mode: Settings.Mode.Id) extends BattleResultsEvent
+  object ModeRemoved {
+    implicit val format: Format[ModeRemoved] = Json.format
+  }
+
   case class ParticipantAdded(participant: Player.Id) extends BattleResultsEvent
   object ParticipantAdded {
     implicit val format: Format[ParticipantAdded] = Json.format
+  }
+
+  case class ParticipantRemoved(participant: Player.Id) extends BattleResultsEvent
+  object ParticipantRemoved {
+    implicit val format: Format[ParticipantRemoved] = Json.format
   }
 
   case class GroupingPatternAdded(groupingPattern: Settings.GroupingPattern) extends BattleResultsEvent
@@ -269,7 +300,9 @@ object BattleSerializerRegistry extends JsonSerializerRegistry {
       JsonSerializer[BattleResultsEvent.Deleted.type],
       JsonSerializer[BattleResultsEvent.ResultUpdated],
       JsonSerializer[BattleResultsEvent.ModeAdded],
+      JsonSerializer[BattleResultsEvent.ModeRemoved],
       JsonSerializer[BattleResultsEvent.ParticipantAdded],
+      JsonSerializer[BattleResultsEvent.ParticipantRemoved],
       JsonSerializer[BattleResultsEvent.GroupingPatternAdded],
       JsonSerializer[BattleResultsEvent.ResultAdded]
     )

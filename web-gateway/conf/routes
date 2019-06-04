@@ -24,14 +24,17 @@ POST    /competitions                                       controllers.Competit
 POST    /competitions/:id/settings/modes                    controllers.SettingController.postMode(id: com.golemiso.mylagom.model.Competition.Id)
 GET     /competitions/:id/settings/modes                    controllers.SettingController.getModes(id: com.golemiso.mylagom.model.Competition.Id)
 POST    /competitions/:id/settings/participants             controllers.SettingController.postParticipant(id: com.golemiso.mylagom.model.Competition.Id)
+GET     /competitions/:id/settings/participants             controllers.SettingController.getParticipants(id: com.golemiso.mylagom.model.Competition.Id)
 POST    /competitions/:id/settings/grouping-patterns        controllers.SettingController.postGroupingPattern(id: com.golemiso.mylagom.model.Competition.Id)
+GET     /competitions/:id/settings/grouping-patterns        controllers.SettingController.getGroupingPatterns(id: com.golemiso.mylagom.model.Competition.Id)
 POST    /competitions/:id/settings/results                  controllers.SettingController.postResult(id: com.golemiso.mylagom.model.Competition.Id)
+GET     /competitions/:id/settings/results                  controllers.SettingController.getResults(id: com.golemiso.mylagom.model.Competition.Id)
 
 # Battle API
 GET     /competitions/:competitionId/battles                controllers.BattleController.getAll(competitionId: com.golemiso.mylagom.model.Competition.Id)
 POST    /competitions/:competitionId/battles                controllers.BattleController.post(competitionId: com.golemiso.mylagom.model.Competition.Id)
 PATCH   /competitions/:competitionId/battles/:id/results    controllers.BattleController.patchResults(competitionId: com.golemiso.mylagom.model.Competition.Id, id: com.golemiso.mylagom.model.Battle.Id)
-GET     /competitions/:competitionId/battles/new-groups     controllers.BattleController.getNewGroups(competitionId: com.golemiso.mylagom.model.Competition.Id, mode: com.golemiso.mylagom.model.Settings.Mode.Id, rankBy: String)
+GET     /competitions/:competitionId/battles/new-groups     controllers.BattleController.getNewGroups(competitionId: com.golemiso.mylagom.model.Competition.Id, mode: com.golemiso.mylagom.model.Settings.Mode.Id, groupingPattern: Option[com.golemiso.mylagom.model.Settings.GroupingPattern.Id])
 
 #GET     /battles/:id                controllers.BattleController.get(id: com.golemiso.mylagom.model.Battle.Id)
 #GET     /battles                    controllers.BattleController.getAll

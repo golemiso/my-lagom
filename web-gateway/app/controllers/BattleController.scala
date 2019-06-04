@@ -29,10 +29,13 @@ class BattleController(mcc: MessagesControllerComponents, service: BattleService
       } yield Ok
     }
 
-  def getNewGroups(competitionId: Competition.Id, mode: Settings.Mode.Id, rankBy: String): Action[AnyContent] =
+  def getNewGroups(
+    competitionId: Competition.Id,
+    mode: Settings.Mode.Id,
+    groupingPattern: Option[Settings.GroupingPattern.Id]): Action[AnyContent] =
     Action.async { _ =>
       for {
-        competitors <- service.getNewGroups(competitionId, mode, rankBy).invoke
+        competitors <- service.getNewGroups(competitionId, mode, groupingPattern.map(_.id)).invoke
       } yield Ok(Json.toJson(competitors))
     }
 }

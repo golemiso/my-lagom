@@ -7,7 +7,7 @@ import akka.actor.ActorSystem
 import akka.stream.Materializer
 import com.golemiso.mylagom.battle.api.BattleService
 import com.golemiso.mylagom.model.{ Battle, Competition, Settings }
-import com.lightbend.lagom.scaladsl.api.ServiceCall
+import com.lightbend.lagom.scaladsl.api.{ Descriptor, ServiceCall }
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntityRegistry
 
 import scala.concurrent.ExecutionContext
@@ -19,7 +19,7 @@ class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
 
   override def addBattle(competitionId: UUID) = ServiceCall { battle =>
     val id = Battle.Id(UUID.randomUUID())
-    refFor(competitionId: Competition.Id).ask(BattleResultsCommand.AddBattle(battle(id)))
+    refFor(competitionId).ask(BattleResultsCommand.AddBattle(battle(id)))
   }
 
   override def readAllBattles(competitionId: UUID) = ServiceCall { _ =>
@@ -40,29 +40,58 @@ class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
 
   override def addMode(competitionId: UUID) = ServiceCall { mode =>
     val id = Settings.Mode.Id(UUID.randomUUID())
-    refFor(competitionId: Competition.Id).ask(BattleResultsCommand.AddMode(mode(id)))
+    refFor(competitionId).ask(BattleResultsCommand.AddMode(mode(id)))
   }
 
-  override def addParticipant(id: UUID) = ServiceCall { participant =>
-    refFor(id).ask(BattleResultsCommand.AddParticipant(participant)).map { _ =>
+  override def readModes(competitionId: UUID) = ServiceCall { _ =>
+    refFor(competitionId).ask(BattleResultsCommand.ReadSettings).map(_.modes)
+  }
+
+  override def removeMode(competitionId: UUID, modeId: UUID) = ServiceCall { mode =>
+    refFor(competitionId).ask(BattleResultsCommand.RemoveMode(modeId)).map { _ =>
+      NotUsed
+    }
+  }
+
+  override def addParticipant(competitionId: UUID) = ServiceCall { participant =>
+    refFor(competitionId).ask(BattleResultsCommand.AddParticipant(participant)).map { _ =>
+      NotUsed
+    }
+  }
+
+  override def readParticipants(competitionId: UUID) = ServiceCall { _ =>
+    refFor(competitionId).ask(BattleResultsCommand.ReadSettings).map(_.participants)
+  }
+
+  override def removeParticipant(competitionId: UUID, playerId: UUID) = ServiceCall { participant =>
+    refFor(competitionId).ask(BattleResultsCommand.RemoveParticipant(participant)).map { _ =>
       NotUsed
     }
   }
 
   override def addGroupingPattern(competitionId: UUID) = ServiceCall { groupingPattern =>
     val id = Settings.GroupingPattern.Id(UUID.randomUUID())
-    refFor(competitionId: Competition.Id).ask(BattleResultsCommand.AddGroupingPattern(groupingPattern(id)))
+    refFor(competitionId).ask(BattleResultsCommand.AddGroupingPattern(groupingPattern(id)))
+  }
+
+  override def readGroupingPatterns(competitionId: UUID) = ServiceCall { _ =>
+    refFor(competitionId).ask(BattleResultsCommand.ReadSettings).map(_.groupingPatterns)
   }
 
   override def addResult(competitionId: UUID) = ServiceCall { result =>
     val id = Settings.Result.Id(UUID.randomUUID())
-    refFor(competitionId: Competition.Id).ask(BattleResultsCommand.AddResult(result(id)))
+    refFor(competitionId).ask(BattleResultsCommand.AddResult(result(id)))
   }
 
-  def getNewGroups(competitionId: UUID, modeId: UUID, rankBy: String) = ServiceCall { _ =>
-    refFor(competitionId).ask(BattleResultsCommand.GetNewGroups(modeId, Settings.GroupingPattern.RankBy(rankBy))).map {
-      _.map(Battle.Competitor(UUID.randomUUID(), _))
-    }
+  override def readResults(competitionId: UUID) = ServiceCall { _ =>
+    refFor(competitionId).ask(BattleResultsCommand.ReadSettings).map(_.results)
+  }
+
+  def getNewGroups(competitionId: UUID, modeId: UUID, groupPatternId: Option[UUID]) = ServiceCall { _ =>
+    refFor(competitionId)
+      .ask(BattleResultsCommand.GetNewGroups(modeId, groupPatternId.map(Settings.GroupingPattern.Id(_)))).map {
+        _.map(Battle.Competitor(UUID.randomUUID(), _))
+      }
   }
 
   private def refFor(competitionId: Competition.Id) = registry.refFor[BattleResultsEntity](competitionId.id.toString)

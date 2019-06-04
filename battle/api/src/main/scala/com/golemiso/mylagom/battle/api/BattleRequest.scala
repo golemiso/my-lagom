@@ -36,7 +36,6 @@ object ResultRequest {
 }
 
 case class GroupingPatternRequest(
-  id: GroupingPattern.Id,
   name: GroupingPattern.Name,
   groups: Seq[GroupingPattern.Group],
   rankBy: GroupingPattern.RankBy) {
