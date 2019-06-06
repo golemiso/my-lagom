@@ -19,7 +19,7 @@ trait BattleService extends Service {
   def removeMode(competitionId: UUID, modeId: UUID): ServiceCall[Settings.Mode.Id, NotUsed]
   def addParticipant(competitionId: UUID): ServiceCall[Player.Id, NotUsed]
   def readParticipants(competition: UUID): ServiceCall[NotUsed, Seq[Player.Id]]
-  def removeParticipant(competitionId: UUID, playerId: UUID): ServiceCall[Player.Id, NotUsed]
+  def removeParticipant(competitionId: UUID, playerId: UUID): ServiceCall[NotUsed, NotUsed]
   def addGroupingPattern(competitionId: UUID): ServiceCall[GroupingPatternRequest, Settings.GroupingPattern.Id]
   def readGroupingPatterns(competition: UUID): ServiceCall[NotUsed, Seq[Settings.GroupingPattern]]
   def addResult(competitionId: UUID): ServiceCall[ResultRequest, Settings.Result.Id]

@@ -103,7 +103,9 @@ class BattleResultsEntity(registry: PersistentEntityRegistry) extends Persistent
         throw new Exception
     }
 
-    if (baseRanking.length != gp.groups.flatMap(_.memberRankings).length) throw new Exception
+    if (state.settings.participants.length != gp.groups.flatMap(_.memberRankings).length)
+      throw new Exception(
+        s"participants=${state.settings.participants.length}, groups=${gp.groups.flatMap(_.memberRankings).length}")
 
     val rankingsWithoutTies =
       Random.shuffle(baseRanking).sorted(Ordering.by((_: PlayerRanking).ranking.ranking).reverse)
@@ -113,8 +115,9 @@ class BattleResultsEntity(registry: PersistentEntityRegistry) extends Persistent
 
   private def createRankings(state: State) = {
 
-    def ranking(tuple: Seq[(Player.Id, Int)]) = {
-      tuple.map(t1 => PlayerRanking(t1._1, PlayerRanking.Ranking(tuple.count(t2 => t1._2 > t2._2) + 1)))
+    def ranking(tuples: Seq[(Player.Id, Int)]) = {
+      (state.settings.participants.map((_, 0)) ++ tuples).map(t1 =>
+        PlayerRanking(t1._1, PlayerRanking.Ranking(tuples.count(t2 => t1._2 > t2._2) + 1)))
     }
 
     PlayerRankings(

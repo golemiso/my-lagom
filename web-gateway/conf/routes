@@ -25,6 +25,7 @@ POST    /competitions/:id/settings/modes                    controllers.SettingC
 GET     /competitions/:id/settings/modes                    controllers.SettingController.getModes(id: com.golemiso.mylagom.model.Competition.Id)
 POST    /competitions/:id/settings/participants             controllers.SettingController.postParticipant(id: com.golemiso.mylagom.model.Competition.Id)
 GET     /competitions/:id/settings/participants             controllers.SettingController.getParticipants(id: com.golemiso.mylagom.model.Competition.Id)
+DELETE  /competitions/:id/settings/participants/:playerId   controllers.SettingController.deleteParticipant(id: com.golemiso.mylagom.model.Competition.Id, playerId: com.golemiso.mylagom.model.Player.Id)
 POST    /competitions/:id/settings/grouping-patterns        controllers.SettingController.postGroupingPattern(id: com.golemiso.mylagom.model.Competition.Id)
 GET     /competitions/:id/settings/grouping-patterns        controllers.SettingController.getGroupingPatterns(id: com.golemiso.mylagom.model.Competition.Id)
 POST    /competitions/:id/settings/results                  controllers.SettingController.postResult(id: com.golemiso.mylagom.model.Competition.Id)

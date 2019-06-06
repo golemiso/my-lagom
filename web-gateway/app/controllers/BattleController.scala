@@ -2,12 +2,14 @@ package controllers
 
 import com.golemiso.mylagom.battle.api._
 import com.golemiso.mylagom.model._
+import com.golemiso.mylagom.player.api.PlayerService
 import play.api.libs.json.Json
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
 
-class BattleController(mcc: MessagesControllerComponents, service: BattleService)(implicit ec: ExecutionContext)
+class BattleController(mcc: MessagesControllerComponents, service: BattleService, playerService: PlayerService)(
+  implicit ec: ExecutionContext)
   extends MessagesAbstractController(mcc) {
 
   def getAll(competitionId: Competition.Id): Action[AnyContent] = Action.async { _ =>
@@ -32,10 +34,9 @@ class BattleController(mcc: MessagesControllerComponents, service: BattleService
   def getNewGroups(
     competitionId: Competition.Id,
     mode: Settings.Mode.Id,
-    groupingPattern: Option[Settings.GroupingPattern.Id]): Action[AnyContent] =
-    Action.async { _ =>
-      for {
-        competitors <- service.getNewGroups(competitionId, mode, groupingPattern.map(_.id)).invoke
-      } yield Ok(Json.toJson(competitors))
-    }
+    groupingPattern: Option[Settings.GroupingPattern.Id]): Action[AnyContent] = Action.async { _ =>
+    for {
+      competitors <- service.getNewGroups(competitionId, mode, groupingPattern.map(_.id)).invoke
+    } yield Ok(Json.toJson(competitors))
+  }
 }

@@ -35,6 +35,12 @@ class SettingController(mcc: MessagesControllerComponents, battleService: Battle
     }
   }
 
+  def deleteParticipant(competitionId: Competition.Id, participant: Player.Id): Action[AnyContent] = Action.async { _ =>
+    battleService.removeParticipant(competitionId, participant).invoke.map { _ =>
+      NoContent
+    }
+  }
+
   def postGroupingPattern(competitionId: Competition.Id): Action[GroupingPatternRequest] =
     Action.async(parse.json[GroupingPatternRequest]) { request =>
       battleService.addGroupingPattern(competitionId).invoke(request.body).map { id =>

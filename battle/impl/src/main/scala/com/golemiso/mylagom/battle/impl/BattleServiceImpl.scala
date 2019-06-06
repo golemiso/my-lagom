@@ -63,8 +63,8 @@ class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
     refFor(competitionId).ask(BattleResultsCommand.ReadSettings).map(_.participants)
   }
 
-  override def removeParticipant(competitionId: UUID, playerId: UUID) = ServiceCall { participant =>
-    refFor(competitionId).ask(BattleResultsCommand.RemoveParticipant(participant)).map { _ =>
+  override def removeParticipant(competitionId: UUID, playerId: UUID) = ServiceCall { _ =>
+    refFor(competitionId).ask(BattleResultsCommand.RemoveParticipant(playerId)).map { _ =>
       NotUsed
     }
   }
