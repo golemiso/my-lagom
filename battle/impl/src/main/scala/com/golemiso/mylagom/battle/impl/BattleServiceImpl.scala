@@ -94,5 +94,9 @@ class BattleServiceImpl(registry: PersistentEntityRegistry, system: ActorSystem)
       }
   }
 
+  def readRankings(competitionId: UUID) = ServiceCall { _ =>
+    refFor(competitionId).ask(BattleResultsCommand.GetRankings)
+  }
+
   private def refFor(competitionId: Competition.Id) = registry.refFor[BattleResultsEntity](competitionId.id.toString)
 }

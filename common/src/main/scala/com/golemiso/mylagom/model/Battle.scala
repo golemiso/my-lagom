@@ -17,6 +17,7 @@ object Battle {
 
   case class Competitor(id: Competitor.Id, players: Seq[Player.Id], result: Option[Settings.Result.Id] = None)
   object Competitor {
+    implicit val playerIdformat: Format[Player.Id] = Json.format
     implicit val format: Format[Competitor] = Json.format
 
     case class Id(id: UUID) extends AnyVal
@@ -82,7 +83,7 @@ object Settings {
     id: GroupingPattern.Id,
     name: GroupingPattern.Name,
     groups: Seq[GroupingPattern.Group],
-    rankBy: GroupingPattern.RankBy)
+    rankBy: RankBy)
   object GroupingPattern {
     implicit val format: Format[GroupingPattern] = Json.format
 
@@ -104,19 +105,6 @@ object Settings {
       object Ranking {
         implicit val format: Format[Ranking] = Json.valueFormat
       }
-    }
-
-    sealed abstract class RankBy(val value: String)
-    object RankBy {
-      case object ModeScores extends RankBy("mode_scores")
-      case object EntireScores extends RankBy("entire_scores")
-      case object Unknown extends RankBy("unknown")
-      val all: Seq[RankBy] = ModeScores :: EntireScores :: Nil
-      def apply(value: String): RankBy = all.find(_.value == value).getOrElse(Unknown)
-      def unapply(mode: RankBy): Option[String] = Some(mode.value)
-
-      implicit val format: Format[RankBy] =
-        Format(Reads.StringReads.map(RankBy.apply), Writes.StringWrites.contramap(_.value))
     }
   }
 }

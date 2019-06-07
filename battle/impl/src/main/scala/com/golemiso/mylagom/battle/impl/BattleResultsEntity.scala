@@ -32,6 +32,9 @@ class BattleResultsEntity(registry: PersistentEntityRegistry) extends Persistent
       }.onReadOnlyCommand[BattleResultsCommand.GetNewGroups, Seq[Seq[Player.Id]]] {
         case (BattleResultsCommand.GetNewGroups(mode, groupingPattern), ctx, state) =>
           ctx.reply(newGroups(state, mode, groupingPattern))
+      }.onReadOnlyCommand[BattleResultsCommand.GetRankings.type, PlayerRankings] {
+        case (BattleResultsCommand.GetRankings, ctx, state) =>
+          ctx.reply(createRankings(state))
       }.onCommand[BattleResultsCommand.AddBattle, Battle.Id] {
         case (BattleResultsCommand.AddBattle(battle), ctx, _) =>
           ctx.thenPersist(BattleResultsEvent.BattleAdded(battle))(_ => ctx.reply(battle.id))
@@ -65,8 +68,10 @@ class BattleResultsEntity(registry: PersistentEntityRegistry) extends Persistent
       }.onEvent {
         case (BattleResultsEvent.BattleAdded(battle), state) =>
           state.copy(battles = state.battles :+ battle)
-        case (BattleResultsEvent.BattleUpdated(battle), state) =>
-          state.updateBattle(battle)
+        case (BattleResultsEvent.ResultUpdated(battle, results), state) =>
+          val b = state.battles.find(_.id == battle).get
+          state.updateBattle(
+            b.copy(competitors = b.competitors.map(c => c.copy(result = Some(results.find(_.id == c.id).get.result)))))
         case (BattleResultsEvent.ModeAdded(mode), state) =>
           state.copy(settings = state.settings.copy(modes = state.settings.modes :+ mode))
         case (BattleResultsEvent.ModeRemoved(mode), state) =>
@@ -95,11 +100,11 @@ class BattleResultsEntity(registry: PersistentEntityRegistry) extends Persistent
         Random.shuffle(state.settings.groupingPatterns).head)
 
     val baseRanking = gp.rankBy match {
-      case Settings.GroupingPattern.RankBy.EntireScores =>
+      case RankBy.EntireScores =>
         allRankings.totalRanking
-      case Settings.GroupingPattern.RankBy.ModeScores =>
+      case RankBy.ModeScores =>
         allRankings.rankingsByMode.find(_.mode == mode).map(_.rankings).get
-      case Settings.GroupingPattern.RankBy.Unknown =>
+      case RankBy.Unknown =>
         throw new Exception
     }
 
@@ -156,6 +161,9 @@ object BattleResultsCommand {
   case class GetNewGroups(mode: Settings.Mode.Id, groupingPattern: Option[Settings.GroupingPattern.Id])
     extends BattleResultsCommand
     with ReplyType[Seq[Seq[Player.Id]]]
+
+  case object GetRankings extends BattleResultsCommand with ReplyType[PlayerRankings]
+
 }
 
 sealed trait BattleResultsEvent extends AggregateEvent[BattleResultsEvent] {
@@ -273,26 +281,6 @@ object PlayerScore {
   case class ScoresByMode(mode: Settings.Mode.Id, score: Score)
   object ScoresByMode {
     implicit val format: Format[ScoresByMode] = Json.format
-  }
-}
-
-case class PlayerRankings(totalRanking: Seq[PlayerRanking], rankingsByMode: Seq[PlayerRankings.RankingsByMode])
-object PlayerRankings {
-  implicit val format: Format[PlayerRankings] = Json.format
-
-  case class RankingsByMode(mode: Settings.Mode.Id, rankings: Seq[PlayerRanking])
-  object RankingsByMode {
-    implicit val format: Format[RankingsByMode] = Json.format
-  }
-}
-
-case class PlayerRanking(player: Player.Id, ranking: PlayerRanking.Ranking)
-object PlayerRanking {
-  implicit val format: Format[PlayerRanking] = Json.format
-
-  case class Ranking(ranking: Int) extends AnyVal
-  object Ranking {
-    implicit val format: Format[Ranking] = Json.valueFormat
   }
 }
 

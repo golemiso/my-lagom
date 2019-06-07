@@ -30,6 +30,8 @@ trait BattleService extends Service {
     modeId: UUID,
     groupPatternId: Option[UUID]): ServiceCall[NotUsed, Seq[Battle.Competitor]]
 
+  def readRankings(competitionId: UUID): ServiceCall[NotUsed, PlayerRankings]
+
   //  def events: Topic[BattleEvent]
 
   def descriptor: Descriptor = {
@@ -56,7 +58,8 @@ trait BattleService extends Service {
         restCall(Method.POST, "/api/competitions/:competitionId/settings/grouping-patterns", addGroupingPattern _),
         restCall(Method.GET, "/api/competitions/:competitionId/settings/grouping-patterns", readGroupingPatterns _),
         restCall(Method.POST, "/api/competitions/:competitionId/settings/results", addResult _),
-        restCall(Method.GET, "/api/competitions/:competitionId/settings/results", readResults _)
+        restCall(Method.GET, "/api/competitions/:competitionId/settings/results", readResults _),
+        restCall(Method.GET, "/api/competitions/:competitionId/rankings", readRankings _)
       ).withAutoAcl(true)
     //      .withTopics(topic("BattleEvent", this.events))
   }

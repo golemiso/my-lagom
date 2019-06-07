@@ -8,6 +8,7 @@ case class BattleRequest(mode: Settings.Mode.Id, competitors: Seq[Battle.Competi
   def apply(id: Battle.Id): Battle = Battle(id, mode, competitors)
 }
 object BattleRequest {
+  implicit val modeIdFormat: Format[Settings.Mode.Id] = Json.format
   implicit val format: Format[BattleRequest] = Json.format
 }
 
@@ -15,7 +16,7 @@ case class BattleResultsRequest(id: Battle.Id, results: Seq[BattleResultsRequest
 object BattleResultsRequest {
   implicit val format: Format[BattleResultsRequest] = Json.format
 
-  case class CompetitorResultPair(competitor: Battle.Competitor.Id, result: Settings.Result.Id)
+  case class CompetitorResultPair(id: Battle.Competitor.Id, result: Settings.Result.Id)
   object CompetitorResultPair {
     implicit val format: Format[CompetitorResultPair] = Json.format
   }
@@ -35,10 +36,7 @@ object ResultRequest {
   implicit val format: Format[ResultRequest] = Json.format
 }
 
-case class GroupingPatternRequest(
-  name: GroupingPattern.Name,
-  groups: Seq[GroupingPattern.Group],
-  rankBy: GroupingPattern.RankBy) {
+case class GroupingPatternRequest(name: GroupingPattern.Name, groups: Seq[GroupingPattern.Group], rankBy: RankBy) {
   def apply(id: GroupingPattern.Id) = GroupingPattern(id, name, groups, rankBy)
 }
 object GroupingPatternRequest {
