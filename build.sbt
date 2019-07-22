@@ -1,4 +1,3 @@
-
 organization in ThisBuild := "com.golemiso"
 version in ThisBuild := "1.0-SNAPSHOT"
 
@@ -10,12 +9,11 @@ val macwire = "com.softwaremill.macwire" %% "macros" % "2.3.0" % "provided"
 val scalaTest = "org.scalatest" %% "scalatest" % "3.0.4" % Test
 val scalaTestPlusPlay = "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
 
-lazy val `common` = (project in file("common"))
-  .settings(
-    libraryDependencies ++= Seq(
-      playJson
-    )
+lazy val `common` = (project in file("common")).settings(
+  libraryDependencies ++= Seq(
+    playJson
   )
+)
 
 lazy val `player-api` = (project in file("player/api"))
   .settings(

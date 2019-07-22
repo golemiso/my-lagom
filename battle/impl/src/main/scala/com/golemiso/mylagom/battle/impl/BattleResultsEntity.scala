@@ -121,8 +121,9 @@ class BattleResultsEntity(registry: PersistentEntityRegistry) extends Persistent
   private def createRankings(state: State) = {
 
     def ranking(tuples: Seq[(Player.Id, Int)]) = {
-      (state.settings.participants.map((_, 0)) ++ tuples).map(t1 =>
-        PlayerRanking(t1._1, PlayerRanking.Ranking(tuples.count(t2 => t1._2 > t2._2) + 1)))
+      state.settings.participants
+        .map(p => tuples.find(_._1 == p).getOrElse((p, 0)))
+        .map(t1 => PlayerRanking(t1._1, PlayerRanking.Ranking(tuples.count(t2 => t1._2 < t2._2) + 1)))
     }
 
     PlayerRankings(
