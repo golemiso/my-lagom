@@ -1,8 +1,7 @@
 package com.golemiso.mylagom.player.impl
 
 import com.golemiso.mylagom.player.api.PlayerService
-import com.lightbend.lagom.scaladsl.api.ServiceLocator
-import com.lightbend.lagom.scaladsl.api.ServiceLocator.NoServiceLocator
+import com.lightbend.lagom.scaladsl.akka.discovery.AkkaDiscoveryComponents
 import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
 import com.lightbend.lagom.scaladsl.persistence.cassandra.CassandraPersistenceComponents
 import com.lightbend.lagom.scaladsl.server._
@@ -22,9 +21,7 @@ abstract class PlayerApplication(context: LagomApplicationContext)
 
 class PlayerApplicationLoader extends LagomApplicationLoader {
   override def load(context: LagomApplicationContext) =
-    new PlayerApplication(context) {
-      override def serviceLocator: ServiceLocator = NoServiceLocator
-    }
+    new PlayerApplication(context) with AkkaDiscoveryComponents
 
   override def loadDevMode(context: LagomApplicationContext) =
     new PlayerApplication(context) with LagomDevModeComponents

@@ -3,6 +3,7 @@ package loader
 import com.golemiso.mylagom.battle.api.BattleService
 import com.golemiso.mylagom.competition.api.CompetitionService
 import com.golemiso.mylagom.player.api.PlayerService
+import com.lightbend.lagom.scaladsl.akka.discovery.AkkaDiscoveryComponents
 import com.lightbend.lagom.scaladsl.api.{ LagomConfigComponent, ServiceAcl, ServiceInfo }
 import com.lightbend.lagom.scaladsl.client.LagomServiceClientComponents
 import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
@@ -14,7 +15,7 @@ import play.api.i18n._
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.mvc._
 import play.api.routing.Router
-import play.api.{ Application, ApplicationLoader, BuiltInComponentsFromContext, LoggerConfigurator }
+import play.api.{ Application, ApplicationLoader, BuiltInComponentsFromContext, LoggerConfigurator, Mode }
 import play.filters.HttpFiltersComponents
 import play.filters.cors.{ CORSConfig, CORSFilter }
 import router.Routes
@@ -35,7 +36,8 @@ abstract class WebGateway(context: Context)
     ServiceInfo("web-gateway", Map("web-gateway" -> immutable.Seq(ServiceAcl.forPathRegex("(?!/api/).*"))))
 
   override lazy val httpFilters: Seq[EssentialFilter] = Seq(
-    new CORSFilter(CORSConfig.fromConfiguration(configuration), httpErrorHandler))
+    new CORSFilter(CORSConfig.fromConfiguration(configuration), httpErrorHandler)
+  )
 
   // set up logger
   LoggerConfigurator(context.environment.classLoader).foreach {
@@ -73,12 +75,12 @@ case class WebGatewayMessagesControllerComponents(
   messagesApi: MessagesApi,
   langs: Langs,
   fileMimeTypes: FileMimeTypes,
-  executionContext: scala.concurrent.ExecutionContext)
-  extends MessagesControllerComponents
+  executionContext: scala.concurrent.ExecutionContext
+) extends MessagesControllerComponents
 
 class WebGatewayMessagesActionBuilder(parser: BodyParser[AnyContent], messagesApi: MessagesApi)(
-  implicit ec: ExecutionContext)
-  extends MessagesActionBuilderImpl(parser, messagesApi)
+  implicit ec: ExecutionContext
+) extends MessagesActionBuilderImpl(parser, messagesApi)
   with MessagesActionBuilder {
   def this(parser: BodyParsers.Default, messagesApi: MessagesApi)(implicit ec: ExecutionContext) = {
     this(parser: BodyParser[AnyContent], messagesApi)
@@ -86,5 +88,10 @@ class WebGatewayMessagesActionBuilder(parser: BodyParser[AnyContent], messagesAp
 }
 
 class WebGatewayLoader extends ApplicationLoader {
-  def load(context: Context): Application = (new WebGateway(context) with LagomDevModeComponents).application
+  override def load(context: Context): Application = context.environment.mode match {
+    case Mode.Dev =>
+      (new WebGateway(context) with LagomDevModeComponents).application
+    case _ =>
+      (new WebGateway(context) with AkkaDiscoveryComponents).application
+  }
 }

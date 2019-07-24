@@ -1,8 +1,7 @@
 package com.golemiso.mylagom.competition.impl
 
 import com.golemiso.mylagom.competition.api.CompetitionService
-import com.lightbend.lagom.scaladsl.api.ServiceLocator
-import com.lightbend.lagom.scaladsl.api.ServiceLocator.NoServiceLocator
+import com.lightbend.lagom.scaladsl.akka.discovery.AkkaDiscoveryComponents
 import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
 import com.lightbend.lagom.scaladsl.persistence.cassandra.CassandraPersistenceComponents
 import com.lightbend.lagom.scaladsl.server.{
@@ -27,9 +26,7 @@ abstract class CompetitionApplication(context: LagomApplicationContext)
 
 class CompetitionApplicationLoader extends LagomApplicationLoader {
   override def load(context: LagomApplicationContext) =
-    new CompetitionApplication(context) {
-      override def serviceLocator: ServiceLocator = NoServiceLocator
-    }
+    new CompetitionApplication(context) with AkkaDiscoveryComponents
 
   override def loadDevMode(context: LagomApplicationContext) =
     new CompetitionApplication(context) with LagomDevModeComponents
