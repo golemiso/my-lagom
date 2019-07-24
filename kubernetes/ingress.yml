@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ama-tableau_ingress
+spec:
+  rules:
+    - http:
+        paths:
+          - path: "/api/hello"
+            backend:
+              serviceName: "hello-lagom-scala-openshift-smoketests-service"
+              servicePort: 9000
+          - path: "/proxy/rest-hello"
+            backend:
+              serviceName: "hello-proxy-lagom-scala-openshift-smoketests-service"
+              servicePort: 9000

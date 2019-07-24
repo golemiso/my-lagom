@@ -1,6 +1,6 @@
 organization in ThisBuild := "com.golemiso"
 version in ThisBuild := "1.0-SNAPSHOT"
-name in ThisBuild := "ama-tableau-api"
+name in ThisBuild := "ama-api"
 
 // the Scala version that will be used for cross-compiled libraries
 scalaVersion in ThisBuild := "2.12.8"
@@ -29,7 +29,7 @@ lazy val `player-impl` = (project in file("player/impl"))
     )
   )
   .settings(
-    packageName in Docker := "ama-tableau_player-api"
+    packageName in Docker := "ama-player-api"
   )
   .dependsOn(`player-api`)
 
@@ -53,7 +53,7 @@ lazy val `battle-impl` = (project in file("battle/impl"))
     )
   )
   .settings(
-    packageName in Docker := "ama-tableau_battle-api"
+    packageName in Docker := "ama-battle-api"
   )
   .dependsOn(`battle-api`)
 
@@ -76,7 +76,7 @@ lazy val `competition-impl` = (project in file("competition/impl"))
     )
   )
   .settings(
-    packageName in Docker := "ama-tableau_competition-api"
+    packageName in Docker := "ama-competition-api"
   )
   .dependsOn(`competition-api`)
 
@@ -100,7 +100,7 @@ lazy val `web-gateway` = (project in file("web-gateway"))
     javaOptions in Test += "-Dconfig.file=test/resources/test.conf"
   )
   .settings(
-    packageName in Docker := "ama-tableau_web-gateway"
+    packageName in Docker := "ama-web-gateway"
   )
   .dependsOn(`player-api`, `competition-api`, `battle-api`)
 

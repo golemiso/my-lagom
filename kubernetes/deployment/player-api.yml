@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # Unique key of the Deployment instance
+  name: ama-player-api
+spec:
+  # 2 Pods should exist at all times.
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ama-player-api
+  template:
+    metadata:
+      labels:
+        # Apply this label to pods and default
+        # the Deployment label selector to this value
+        app: ama-player-api
+    spec:
+      containers:
+        - name: ama-tableau-player-api
+          # Run this image
+          image: ama-player-api:1.0-SNAPSHOT
+          env:
+            - name: JAVA_OPTS
+              value: "-Dconfig.resource=application.conf -Dplay.server.pidfile.path=/dev/null"
+            - name: TRANSPORT_HTTP_BIND_ADDRESS
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: DEPLOYMENT_SERVICE_NAME
+              value: ama-tableau-player-api-service
+          ports:
+            # application
+            - name: http
+              containerPort: 9000
+          resources:
+            limits:
+              cpu: 0.5
+              memory: 512Mi
+            requests:
+              cpu: 0.5
+              memory: 512Mi
+          command:
+            - "/opt/docker/bin/player-impl"
+      volumes: []
