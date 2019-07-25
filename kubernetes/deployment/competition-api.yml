@@ -2,24 +2,24 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   # Unique key of the Deployment instance
-  name: ama-player-api
+  name: ama-competition-api
 spec:
   # 2 Pods should exist at all times.
   replicas: 1
   selector:
     matchLabels:
-      app: ama-player-api
+      app: ama-competition-api
   template:
     metadata:
       labels:
         # Apply this label to pods and default
         # the Deployment label selector to this value
-        app: ama-player-api
+        app: ama-competition-api
     spec:
       containers:
-        - name: ama-player-api
+        - name: ama-competition-api
           # Run this image
-          image: ama-player-api:1.0-SNAPSHOT
+          image: ama-competition-api:1.0-SNAPSHOT
           env:
             - name: JAVA_OPTS
               value: "-Dconfig.resource=application.conf -Dplay.server.pidfile.path=/dev/null"
@@ -35,5 +35,5 @@ spec:
               cpu: 0.1
               memory: 256Mi
           command:
-            - "/opt/docker/bin/player-impl"
+            - "/opt/docker/bin/competition-impl"
       volumes: []
