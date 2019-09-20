@@ -1,25 +1,39 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-gateway
+  namespace: ama
+spec:
+  ports:
+    - port: 9000
+      protocol: TCP
+  selector:
+    app: web-gateway
+  type: NodePort
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   # Unique key of the Deployment instance
-  name: ama-web-gateway
+  name: web-gateway
+  namespace: ama
 spec:
   # 2 Pods should exist at all times.
   replicas: 1
   selector:
     matchLabels:
-      app: ama-web-gateway
+      app: web-gateway
   template:
     metadata:
       labels:
         # Apply this label to pods and default
         # the Deployment label selector to this value
-        app: ama-web-gateway
+        app: web-gateway
     spec:
       containers:
-        - name: ama-web-gateway
+        - name: web-gateway
           # Run this image
-          image: ama-web-gateway:1.0-SNAPSHOT
+          image: golemiso/web-gateway:1.0-SNAPSHOT
           env:
             - name: JAVA_OPTS
               value: "-Dconfig.resource=application.conf -Dplay.server.pidfile.path=/dev/null"

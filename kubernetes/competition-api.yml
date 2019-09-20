@@ -1,32 +1,63 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: competition
+  namespace: ama
+spec:
+  clusterIP: None
+  ports:
+    - name: http
+      port: 9000
+      protocol: TCP
+    - name: service-locator
+      port: 9008
+      protocol: TCP
+    - name: remoting
+      port: 2552
+      protocol: TCP
+    - name: management
+      port: 8558
+      protocol: TCP
+  selector:
+    app: competition
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   # Unique key of the Deployment instance
-  name: ama-competition-api
+  name: competition
+  namespace: ama
 spec:
   # 2 Pods should exist at all times.
   replicas: 1
   selector:
     matchLabels:
-      app: ama-competition-api
+      app: competition
   template:
     metadata:
       labels:
         # Apply this label to pods and default
         # the Deployment label selector to this value
-        app: ama-competition-api
+        app: competition
     spec:
       containers:
-        - name: ama-competition-api
+        - name: competition
           # Run this image
-          image: ama-competition-api:1.0-SNAPSHOT
+          image: golemiso/competition:1.0-SNAPSHOT
           env:
             - name: JAVA_OPTS
               value: "-Dconfig.resource=application.conf -Dplay.server.pidfile.path=/dev/null"
+            - name: CASSANDRA_SERVICE_NAME
+              value: cassandra
           ports:
-            # application
             - name: http
               containerPort: 9000
+            - name: service-locator
+              containerPort: 9008
+            - name: remoting
+              containerPort: 2552
+            - name: management
+              containerPort: 8558
           resources:
             limits:
               cpu: 0.1

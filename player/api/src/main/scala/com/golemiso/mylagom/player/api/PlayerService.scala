@@ -17,7 +17,7 @@ trait PlayerService extends Service {
 
   def descriptor: Descriptor = {
     import Service._
-    named("players").withCalls(
+    named("player").withCalls(
       restCall(Method.POST, "/api/players", create _),
       restCall(Method.GET, "/api/players/:id", read _),
       restCall(Method.PUT, "/api/players/:id", update _),

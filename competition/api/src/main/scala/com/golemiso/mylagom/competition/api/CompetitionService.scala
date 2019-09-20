@@ -16,7 +16,7 @@ trait CompetitionService extends Service {
 
   def descriptor: Descriptor = {
     import Service._
-    named("competitions").withCalls(
+    named("competition").withCalls(
       restCall(Method.POST, "/api/competitions", create _),
       restCall(Method.GET, "/api/competitions/:id", read _),
       restCall(Method.GET, "/api/competitions", readAll)

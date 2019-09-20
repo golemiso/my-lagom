@@ -1,19 +1,34 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: cassandra
+  name: cassandra
+  namespace: ama
+spec:
+  clusterIP: None
+  ports:
+    - port: 9042
+  selector:
+    app: cassandra
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: ama-cassandra
+  name: cassandra
+  namespace: ama
   labels:
-    app: ama-cassandra
+    app: cassandra
 spec:
-  serviceName: ama-cassandra
-  replicas: 1
+  serviceName: cassandra
+  replicas: 2
   selector:
     matchLabels:
-      app: ama-cassandra
+      app: cassandra
   template:
     metadata:
       labels:
-        app: ama-cassandra
+        app: cassandra
     spec:
       terminationGracePeriodSeconds: 1800
       containers:
@@ -53,7 +68,7 @@ spec:
             - name: HEAP_NEWSIZE
               value: 100M
             - name: CASSANDRA_SEEDS
-              value: "cassandra-0.cassandra.default.svc.cluster.local"
+              value: "cassandra-0.cassandra.ama.svc.cluster.local"
             - name: CASSANDRA_CLUSTER_NAME
               value: "K8Demo"
             - name: CASSANDRA_DC
@@ -86,7 +101,7 @@ spec:
         name: cassandra-data
       spec:
         accessModes: [ "ReadWriteOnce" ]
-        storageClassName: ama-storage-class
+        storageClassName: fast
         resources:
           requests:
             storage: 1Gi
@@ -94,32 +109,8 @@ spec:
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
-  name: ama-storage-class
-provisioner: k8s.io/minikube-hostpath
+  name: fast
+  namespace: ama
+provisioner: docker.io/hostpath
 parameters:
   type: pd-ssd
----
-kind: PersistentVolume
-apiVersion: v1
-metadata:
-  name: ama-persistent-volume
-spec:
-  storageClassName: ama-storage-class
-  capacity:
-    storage: 1Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: /Users/koki_kinjo/cassandra_data
----
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: ama-persistent-volume-claim
-spec:
-  storageClassName: ama-storage-class
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
