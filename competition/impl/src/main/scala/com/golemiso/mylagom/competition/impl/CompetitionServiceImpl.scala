@@ -48,7 +48,7 @@ class CompetitionServiceImpl(registry: PersistentEntityRegistry, system: ActorSy
         val entityId = id.split("\\|", 2).last
         registry.refFor[CompetitionEntity](entityId).ask(CompetitionCommand.Read)
       }.collect {
-        case Some(player) => player
+        case Some(competition) => competition
       }
       .runWith(Sink.seq)
   }

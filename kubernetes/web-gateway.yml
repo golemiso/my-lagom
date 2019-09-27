@@ -3,22 +3,23 @@ kind: Service
 metadata:
   name: web-gateway
   namespace: ama
+  labels:
+    app: web-gateway
 spec:
   ports:
     - port: 9000
       protocol: TCP
   selector:
     app: web-gateway
-  type: NodePort
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  # Unique key of the Deployment instance
   name: web-gateway
   namespace: ama
+  labels:
+    app: web-gateway
 spec:
-  # 2 Pods should exist at all times.
   replicas: 1
   selector:
     matchLabels:
@@ -26,27 +27,24 @@ spec:
   template:
     metadata:
       labels:
-        # Apply this label to pods and default
-        # the Deployment label selector to this value
         app: web-gateway
     spec:
       containers:
         - name: web-gateway
-          # Run this image
           image: golemiso/web-gateway:1.0-SNAPSHOT
+          imagePullPolicy: Always
           env:
             - name: JAVA_OPTS
               value: "-Dconfig.resource=application.conf -Dplay.server.pidfile.path=/dev/null"
           ports:
-            # application
             - name: http
               containerPort: 9000
           resources:
             limits:
-              cpu: 0.1
+              cpu: 200m
               memory: 256Mi
             requests:
-              cpu: 0.1
+              cpu: 100m
               memory: 256Mi
           command:
             - "/opt/docker/bin/web-gateway"

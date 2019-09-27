@@ -11,8 +11,11 @@ val scalaTest = "org.scalatest" %% "scalatest" % "3.0.4" % Test
 val scalaTestPlusPlay = "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
 val lagomScaladslAkkaDiscovery = "com.lightbend.lagom" %% "lagom-scaladsl-akka-discovery-service-locator" % com.lightbend.lagom.core.LagomVersion.current
 
-lazy val `ama` = (project in file("."))
+lazy val root = (project in file("."))
   .aggregate(`player-impl`, `battle-impl`, `competition-impl`, `web-gateway`)
+  .settings(
+    publish in Docker := Unit
+  )
 
 lazy val `common` = (project in file("common"))
   .settings(

@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: battle
   namespace: ama
+  labels:
+    app: battle
 spec:
   clusterIP: None
   ports:
@@ -20,30 +22,49 @@ spec:
       protocol: TCP
   selector:
     app: battle
+  publishNotReadyAddresses: true
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  # Unique key of the Deployment instance
   name: battle
   namespace: ama
+  labels:
+    app: battle
 spec:
-  # 2 Pods should exist at all times.
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: battle
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
   template:
     metadata:
       labels:
-        # Apply this label to pods and default
-        # the Deployment label selector to this value
         app: battle
     spec:
+      restartPolicy: Always
       containers:
         - name: battle
-          # Run this image
           image: golemiso/battle:1.0-SNAPSHOT
+          imagePullPolicy: Always
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: management
+            periodSeconds: 10
+            failureThreshold: 10
+            initialDelaySeconds: 120
+          livenessProbe:
+            httpGet:
+              path: /alive
+              port: management
+            periodSeconds: 10
+            failureThreshold: 10
+            initialDelaySeconds: 120
           env:
             - name: JAVA_OPTS
               value: "-Dconfig.resource=application.conf -Dplay.server.pidfile.path=/dev/null"
@@ -60,10 +81,10 @@ spec:
               containerPort: 8558
           resources:
             limits:
-              cpu: 0.1
+              cpu: 300m
               memory: 256Mi
             requests:
-              cpu: 0.1
+              cpu: 200m
               memory: 256Mi
           command:
             - "/opt/docker/bin/battle-impl"
